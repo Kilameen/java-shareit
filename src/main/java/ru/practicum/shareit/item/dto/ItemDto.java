@@ -6,18 +6,19 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import ru.practicum.shareit.utils.Marker;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Data
 @Builder
 public class ItemDto {
-    @NotNull(message = "Id товара должно быть указано")
+
     Long id;
-    @NotBlank(message = "Название товара не может быть пустым иил содержать только пробелы")
+    @NotBlank(message = "Название товара не может быть пустым или содержать только пробелы", groups = {Marker.OnCreate.class, Marker.OnUpdate.class})
     String name;
-    @NotBlank(message = "Описание товара не может быть пустым иил содержать только пробелы")
+    @NotBlank(message = "Описание товара не может быть пустым или содержать только пробелы", groups = {Marker.OnCreate.class, Marker.OnUpdate.class})
     String description;
-    @NotNull(message = "Статус о том, доступна или нет вещь для аренды обязателен")
-    boolean available;
+    @NotNull(message = "Статус о том, доступна или нет вещь для аренды обязателен", groups = {Marker.OnCreate.class, Marker.OnUpdate.class})
+    Boolean available;
     Long request;
 }

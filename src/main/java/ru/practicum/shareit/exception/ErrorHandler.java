@@ -8,34 +8,23 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class ErrorHandler {
 
+
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handlerNotFoundException(NotFoundException e) {
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handlerValidationException(ValidationException e) {
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler(Throwable.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handlerValidationException(Throwable e) {
-        String errorMessage = "Произошла внутренняя ошибка сервера: ";
-        errorMessage += "Тип исключения - " + e.getClass().getSimpleName() + ". ";
-        if (e.getMessage() != null && !e.getMessage().isEmpty()) {
-            errorMessage += "Сообщение: " + e.getMessage();
-        } else {
-            errorMessage += "Сообщение отсутствует.";
-        }
-        return new ErrorResponse(errorMessage);
+    public ErrorResponse handleNotFoundException(NotFoundException ex) {
+        return new ErrorResponse(ex.getMessage());
     }
 
     @ExceptionHandler(DuplicatedDataException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handlerDuplicatedDataException(DuplicatedDataException e) {
-        return new ErrorResponse(e.getMessage());
+    public ErrorResponse handleDuplicatedDataException(DuplicatedDataException ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleGenericException(Exception ex) {
+        // Log the exception for debugging purposes
+        return new ErrorResponse("Произошла непредвиденная ошибка: " + ex.getMessage());
     }
 }
