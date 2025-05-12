@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.service.ItemRepositoryImpl;
+import ru.practicum.shareit.item.ItemRepositoryImpl;
 
 import java.util.Collection;
 import java.util.List;

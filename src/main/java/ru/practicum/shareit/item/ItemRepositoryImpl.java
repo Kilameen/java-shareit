@@ -1,6 +1,5 @@
-package ru.practicum.shareit.item.service;
+package ru.practicum.shareit.item;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -10,7 +9,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
-@RequiredArgsConstructor
 @Slf4j
 public class ItemRepositoryImpl implements ItemRepository {
 
