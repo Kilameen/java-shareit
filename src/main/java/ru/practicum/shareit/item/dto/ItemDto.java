@@ -14,11 +14,11 @@ import ru.practicum.shareit.utils.Marker;
 public class ItemDto {
 
     Long id;
-    @NotBlank(message = "Название товара не может быть пустым или содержать только пробелы", groups = {Marker.OnCreate.class, Marker.OnUpdate.class})
+    @NotBlank(message = "Название товара не может быть пустым или содержать только пробелы", groups = {Marker.OnCreate.class})
     String name;
-    @NotBlank(message = "Описание товара не может быть пустым или содержать только пробелы", groups = {Marker.OnCreate.class, Marker.OnUpdate.class})
+    @NotBlank(message = "Описание товара не может быть пустым или содержать только пробелы", groups = {Marker.OnCreate.class})
     String description;
-    @NotNull(message = "Статус о том, доступна или нет вещь для аренды обязателен", groups = {Marker.OnCreate.class, Marker.OnUpdate.class})
+    @NotNull(message = "Статус о том, доступна или нет вещь для аренды обязателен", groups = {Marker.OnCreate.class})
     Boolean available;
     Long request;
 }

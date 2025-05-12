@@ -5,7 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.service.ItemDtoService;
+import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.utils.Marker;
 
 import java.util.Collection;
 import java.util.List;
@@ -16,36 +17,37 @@ import java.util.List;
 @Validated
 public class ItemController {
 
-    private final ItemDtoService itemDtoService;
+    private final ItemService itemService;
 
     @PostMapping
+    @Validated(Marker.OnCreate.class)
     public ItemDto create(@RequestHeader("X-Sharer-User-Id") Long userId, @Valid @RequestBody ItemDto itemDto) {
-        return itemDtoService.create(itemDto, userId);
+        return itemService.create(itemDto, userId);
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto update(@RequestHeader("X-Sharer-User-Id") Long userId, @Valid @PathVariable Long itemId, @RequestBody ItemDto itemDto) {
-        return itemDtoService.update(itemId, itemDto, userId);
+    public ItemDto update(@RequestHeader("X-Sharer-User-Id") Long userId, @PathVariable Long itemId, @RequestBody ItemDto itemDto) {
+        return itemService.update(itemId, itemDto, userId);
     }
 
     @GetMapping("/{itemId}")
     public ItemDto getItemById(@PathVariable Long itemId) {
-        return itemDtoService.getItemDtoById(itemId);
+        return itemService.getItemDtoById(itemId);
     }
 
     @GetMapping
     public Collection<ItemDto> getItemsByUserId(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        return itemDtoService.getAllItemDtoByUserId(userId);
+        return itemService.getAllItemDtoByUserId(userId);
     }
 
 
     @GetMapping("/search")
     public List<ItemDto> searchItems(@RequestParam String text) {
-        return itemDtoService.searchItems(text);
+        return itemService.searchItems(text);
     }
 
     @DeleteMapping("/{itemId}")
     public void deleteItem(@PathVariable Long itemId) {
-        itemDtoService.deleteItem(itemId);
+        itemService.deleteItem(itemId);
     }
 }

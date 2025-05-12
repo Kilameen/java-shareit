@@ -5,7 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.service.UserDtoService;
+import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.utils.Marker;
 
 import java.util.List;
 
@@ -15,30 +16,32 @@ import java.util.List;
 @Validated
 public class UserController {
 
-    private final UserDtoService userDtoService;
+    private final UserService userService;
 
     @PostMapping
+    @Validated(Marker.OnCreate.class)
     public UserDto create(@Valid @RequestBody UserDto userDto) {
-        return userDtoService.create(userDto);
+        return userService.create(userDto);
     }
 
     @PatchMapping("/{id}")
-    public UserDto update(@Valid @PathVariable Long id, @RequestBody UserDto userDto) {
-        return userDtoService.update(id, userDto);
+    @Validated(Marker.OnUpdate.class)
+    public UserDto update(@PathVariable Long id, @Valid @RequestBody UserDto userDto) {
+        return userService.update(id, userDto);
     }
 
     @GetMapping("/{id}")
     public UserDto getUserById(@PathVariable Long id) {
-        return userDtoService.findUserById(id);
+        return userService.findUserById(id);
     }
 
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Long id) {
-        userDtoService.delete(id);
+        userService.delete(id);
     }
 
     @GetMapping
     public List<UserDto> getAllUsers() {
-        return userDtoService.findAll();
+        return userService.findAll();
     }
 }

@@ -1,88 +1,77 @@
 package ru.practicum.shareit.user.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service; // Changed to @Service
+import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.DuplicatedDataException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.user.UserMapper;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.List;
+import java.util.stream.Collectors;
 
-@Service // Changed to @Service
 @Slf4j
+@Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final Map<Long, User> users = new HashMap<>();
+    private final UserRepository userRepository;
 
     @Override
-    public User create(User user) {
-        log.info("Попытка создать пользователя с email: {}", user.getEmail());
-        validateEmail(user);
-        user.setId(getNextId());
-        users.put(user.getId(), user);
-        log.info("Пользователь с id {} и email {} успешно создан", user.getId(), user.getEmail());
-        return user;
+    public UserDto create(UserDto userDto) {
+        User user = UserMapper.toUser(userDto);
+        User createdUser = userRepository.create(user);
+        return UserMapper.toUserDto(createdUser);
     }
 
     @Override
-    public User update(User updateUser) {
-        log.info("Попытка обновить пользователя с id: {}", updateUser.getId());
-        if (users.containsKey(updateUser.getId())) {
-            User oldInformationUser = users.get(updateUser.getId());
-
-            if (updateUser.getName() != null) {
-                oldInformationUser.setName(updateUser.getName());
-            }
-
-            if (updateUser.getEmail() != null && !oldInformationUser.getEmail().equals(updateUser.getEmail())) {
-                validateEmail(updateUser);
-                oldInformationUser.setEmail(updateUser.getEmail());
-            }
-
-            log.info("Пользователь с id {} успешно обновлен", updateUser.getId());
-            return oldInformationUser;
-
-        } else {
-            log.warn("Пользователь с id {} не найден для обновления", updateUser.getId());
-            throw new NotFoundException("Пользователь с id " + updateUser.getId() + " не найден");
+    public UserDto update(Long id, UserDto userUpdateDto) {
+        User user = userRepository.findUserById(id);
+        if (user == null) {
+            throw new NotFoundException("Пользователь с id " + id + " не найден");
         }
+
+        if (userUpdateDto.getName() != null) {
+            user.setName(userUpdateDto.getName());
+        }
+
+        if (userUpdateDto.getEmail() != null && !userUpdateDto.getEmail().equals(user.getEmail())) {
+            validateEmail(userUpdateDto.getEmail(), id);
+            user.setEmail(userUpdateDto.getEmail());
+        }
+
+        User updatedUser = userRepository.update(user);
+        return UserMapper.toUserDto(updatedUser);
     }
 
     @Override
-    public Collection<User> findAll() {
-        log.info("Список всех пользователей");
-        return users.values();
-    }
-
-    @Override
-    public User findUserById(Long id) {
-        log.info("Поиск пользователя по ID: {}", id);
-        return users.get(id);
+    public UserDto findUserById(Long id) {
+        User user = userRepository.findUserById(id);
+        if (user == null) {
+            throw new NotFoundException("Пользователь с id " + id + " не найден");
+        }
+        return UserMapper.toUserDto(user);
     }
 
     @Override
     public void delete(Long id) {
-        log.info("Удаление пользователя по ID: {}", id);
-        users.remove(id);
+        userRepository.delete(id);
     }
 
-    private void validateEmail(User user) throws DuplicatedDataException {
-        if (user.getEmail() != null && users.values().stream()
-                .anyMatch(u -> u.getEmail() != null && u.getEmail().equals(user.getEmail()) && !Objects.equals(u.getId(), user.getId()))) {
-            log.error("Email {} уже используется", user.getEmail());
-            throw new DuplicatedDataException("Этот email уже используется");
-        }
+    @Override
+    public List<UserDto> findAll() {
+        return userRepository.findAll().stream()
+                .map(UserMapper::toUserDto)
+                .collect(Collectors.toList());
     }
 
-    private long getNextId() {
-        long currentMaxId = users.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0L);
-        return ++currentMaxId;
+    private void validateEmail(String email, Long userId) {
+        userRepository.findAll().forEach(user -> {
+            if (user.getEmail().equals(email) && !user.getId().equals(userId)) {
+                throw new DuplicatedDataException("Email уже используется");
+            }
+        });
     }
 }

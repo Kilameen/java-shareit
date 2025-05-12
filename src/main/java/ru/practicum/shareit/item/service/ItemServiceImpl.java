@@ -2,93 +2,79 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.service.UserRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Repository
+@Service
 @RequiredArgsConstructor
 @Slf4j
 public class ItemServiceImpl implements ItemService {
 
-    private final Map<Long, Item> items = new HashMap<>();
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
 
     @Override
-    public Item create(Item item) {
-        item.setId(getNextId());
-        items.put(item.getId(), item);
-        log.info("Создан предмет с ID: {}", item.getId());
-        return item;
+    public ItemDto create(ItemDto itemDto, Long userId) {
+
+        if (userRepository.findUserById(userId) == null) {
+            throw new NotFoundException("Пользователь с ID " + userId + " не найден.");
+        }
+
+        Item item = ItemMapper.toItem(itemDto);
+        item.setOwner(userId);
+        Item createdItem = itemRepository.create(item);
+        log.info("Создан предмет с ID: {}", createdItem.getId());
+        return ItemMapper.toItemDto(createdItem);
     }
 
     @Override
-    public Item update(Long itemId, Item updateItem, Long userId) {
-        Item oldItem = items.get(itemId);
-
-        if (oldItem == null) {
-            throw new NotFoundException("Предмет с ID " + itemId + " не найден.");
-        }
-
-        if (!Objects.equals(oldItem.getOwner(), userId)) {
-            throw new NotFoundException("У вас нет прав на обновление этого предмета.");
-        }
-
-        Optional.ofNullable(updateItem.getName()).ifPresent(oldItem::setName);
-        Optional.ofNullable(updateItem.getDescription()).ifPresent(oldItem::setDescription);
-        Optional.ofNullable(updateItem.getAvailable()).ifPresent(oldItem::setAvailable);
-
-        items.put(itemId, oldItem);
+    public ItemDto update(Long itemId, ItemDto itemDto, Long userId) {
+        Item itemFromDto = ItemMapper.toItem(itemDto);
+        Item updatedItem = itemRepository.update(itemId, itemFromDto, userId);
         log.info("Обновлен предмет с ID: {}", itemId);
-        return oldItem;
+        return ItemMapper.toItemDto(updatedItem);
     }
 
     @Override
-    public Item getItemById(Long itemId) {
-        Item item = items.get(itemId);
+    public ItemDto getItemDtoById(Long itemId) {
+        Item item = itemRepository.getItemById(itemId);
         if (item == null) {
             throw new NotFoundException("Предмет с ID " + itemId + " не найден.");
         }
         log.info("Получен предмет с ID: {}", itemId);
-        return item;
+        return ItemMapper.toItemDto(item);
     }
 
     @Override
-    public Collection<Item> findAll() {
-        log.info("Список всех пользователей");
-        return items.values();
+    public Collection<ItemDto> getAllItemDtoByUserId(Long userId) {
+        return itemRepository.findAll().stream()
+                .filter(item -> Objects.equals(item.getOwner(), userId))
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Item> searchItems(String text) {
+    public List<ItemDto> searchItems(String text) {
         if (text == null || text.isBlank()) {
             return List.of();
         }
-        String searchText = text.toLowerCase();
-        List<Item> searchResults = items.values().stream()
-                .filter(Item::getAvailable)
-                .filter(item -> item.getName().toLowerCase().contains(searchText) ||
-                        item.getDescription().toLowerCase().contains(searchText))
-                .collect(Collectors.toList());
-
+        List<Item> items = itemRepository.searchItems(text);
         log.info("Поиск предметов по тексту: {}", text);
-        return searchResults;
+        return items.stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public void deleteItem(Long itemId) {
+        itemRepository.deleteItem(itemId);
         log.info("Удален предмет с ID: {}", itemId);
-        items.remove(itemId);
-    }
-
-    private long getNextId() {
-        long currentMaxId = items.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
     }
 }

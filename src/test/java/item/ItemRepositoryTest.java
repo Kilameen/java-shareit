@@ -4,22 +4,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.service.ItemServiceImpl;
+import ru.practicum.shareit.item.service.ItemRepositoryImpl;
 
 import java.util.Collection;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ItemServiceTest {
+class ItemRepositoryTest {
 
-    private ItemServiceImpl itemService;
+    private ItemRepositoryImpl itemService;
     private Item item1;
     private Item item2;
 
     @BeforeEach
     void setUp() {
-        itemService = new ItemServiceImpl();
+        itemService = new ItemRepositoryImpl();
 
         item1 = Item.builder().id(1L).name("Item 1").description("Description 1").available(true).owner(1L).build();
         item2 = Item.builder().id(2L).name("Item 2").description("Description 2").available(true).owner(1L).build();
