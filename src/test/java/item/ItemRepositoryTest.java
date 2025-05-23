@@ -3,8 +3,8 @@ package item;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.ItemRepositoryImpl;
 
 import java.util.Collection;
 import java.util.List;
@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ItemRepositoryTest {
 
-    private ItemRepositoryImpl itemService;
+    private ItemRepository itemService;
     private Item item1;
     private Item item2;
 

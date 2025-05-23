@@ -6,7 +6,6 @@ import ru.practicum.shareit.exception.DuplicatedDataException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.UserRepository;
-import ru.practicum.shareit.user.UserRepositoryImpl;
 
 import java.util.Collection;
 
