@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking;
 
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.booking.dto.BookingDto;
 
 import java.util.List;
 
@@ -10,28 +11,28 @@ public class BookingController {
 
 
     @PostMapping
-    public Booking create(@RequestBody Booking booking) {
-        return booking;
+    public BookingDto create(@RequestBody BookingDto bookingDto) {
+
     }
 
     @PatchMapping("/{bookingId}")
-    public Booking update(@PathVariable Long bookingId, @RequestParam boolean approved) {
+    public BookingDto update(@PathVariable Long bookingId, @RequestParam boolean approved) {
         return new Booking();
     }
 
     @GetMapping("/{bookingId}")
-    public Booking getBookingById(@PathVariable Long bookingId) {
+    public BookingDto getBookingById(@PathVariable Long bookingId) {
         return new Booking();
     }
 
     @GetMapping
-    public List<Booking> findAll(@RequestParam(defaultValue = "ALL") String state) {
+    public List<BookingDto> findAll(@RequestParam(defaultValue = "ALL") String state) {
 
         return List.of();
     }
 
     @GetMapping("/owner")
-    public List<Booking> getOwnerBookings(@RequestParam(defaultValue = "ALL") String state) {
+    public List<BookingDto> getOwnerBookings(@RequestParam(defaultValue = "ALL") String state) {
 
         return List.of();
     }

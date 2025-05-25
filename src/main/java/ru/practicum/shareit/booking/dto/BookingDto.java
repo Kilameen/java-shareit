@@ -7,7 +7,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.user.dto.UserDto;
 
 
 import java.time.LocalDateTime;
@@ -16,16 +17,20 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookingDto {
     Long id;
+    ItemDto item;
     @NotNull
     @FutureOrPresent
     LocalDateTime start;
     @NotNull
     @Future
     LocalDateTime end;
-    Item item;
+    UserDto booker;
 
     public Long getItemId() {
         return item.getId();
+    }
+    public long getBookerId() {
+        return booker.getId();
     }
 }
 
