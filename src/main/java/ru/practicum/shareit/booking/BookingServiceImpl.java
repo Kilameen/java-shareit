@@ -8,9 +8,7 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.State;
 import ru.practicum.shareit.booking.dto.Status;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.ItemRepository;
-import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -32,26 +30,45 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     @Override
     public BookingDto create(Long userId, BookingDto bookingDto) {
-
         User user = UserMapper.toUser(userService.findUserById(userId));
-
         Item item = itemRepository.findById(bookingDto.getItemId())
                 .orElseThrow(() -> new NotFoundException("Вещь не найдена."));
 
         if (!item.getAvailable()) {
             throw new IllegalStateException("Вещь недоступна для бронирования.");
         }
+        if (item.getOwner().getId().equals(userId)) {
+            throw new NotFoundException("Владелец не может бронировать свою вещь.");
+        }
+
+        if (bookingDto.getStart().isAfter(bookingDto.getEnd())) {
+            throw new IllegalArgumentException("Время начала не может быть позже времени окончания.");
+        }
 
         Booking booking = BookingMapper.toBooking(user, item, bookingDto);
+        booking.setStatus(Status.WAITING);
         Booking bookingCreate = bookingRepository.save(booking);
         return BookingMapper.toBookingDto(bookingCreate);
     }
 
+
     @Transactional
     @Override
-    public BookingDto update(Long bookingId, Boolean approved) {
+    public BookingDto update(Long bookingId, Boolean approved, Long userId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронирование " + bookingId + " не найдено."));
+
+        if (booking.getItem() == null) {
+            throw new IllegalStateException("Item is null for booking " + bookingId);
+        }
+
+        if (!booking.getItem().getOwner().getId().equals(userId)) {
+            throw new NotFoundException("Только владелец вещи может подтвердить или отклонить бронирование.");
+        }
+
+        if (booking.getStatus() != Status.WAITING) {
+            throw new IllegalStateException("Статус можно изменить только у бронирования со статусом WAITING.");
+        }
 
         Status newStatus = approved ? Status.APPROVED : Status.REJECTED;
         booking.setStatus(newStatus);
@@ -60,9 +77,14 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public BookingDto getBookingById(Long bookingId) {
+    public BookingDto getBookingById(Long bookingId, Long userId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронирование " + bookingId + " не найдено."));
+
+        if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwner().getId().equals(userId)) {
+            throw new NotFoundException("Просматривать бронирование может только владелец вещи или создатель брони.");
+        }
+
         return BookingMapper.toBookingDto(booking);
     }
 

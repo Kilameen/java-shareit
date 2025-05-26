@@ -9,6 +9,8 @@ import ru.practicum.shareit.user.model.User;
 @Data
 @Builder
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor //
 @Table(name = "items")
 public class Item {
     @Id
@@ -25,9 +27,4 @@ public class Item {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     User owner;
-    @ManyToOne
-    @JoinColumn(name = "request_id")
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    User request;
 }

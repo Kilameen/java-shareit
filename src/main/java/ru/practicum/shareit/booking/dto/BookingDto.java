@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookingDto {
     Long id;
+    @NotNull
     ItemDto item;
     @NotNull
     @FutureOrPresent
