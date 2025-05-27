@@ -16,6 +16,7 @@ import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,33 +32,30 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto create(Long userId, BookingDto bookingDto) {
         User user = UserMapper.toUser(userService.findUserById(userId));
-        Item item = itemRepository.findById(bookingDto.getItemId())
-                .orElseThrow(() -> new NotFoundException("Вещь не найдена."));
-
-        if (!item.getAvailable()) {
-            throw new IllegalStateException("Вещь недоступна для бронирования.");
+        // Получаем item из базы данных по ID, указанному в bookingDto
+        Optional<Item> itemById = itemRepository.findById(bookingDto.getItemId());
+        if (itemById.isEmpty()) {
+            throw new NotFoundException("Вещь не найдена.");
         }
+        Item item = itemById.get();
+
         if (item.getOwner().getId().equals(userId)) {
             throw new NotFoundException("Владелец не может бронировать свою вещь.");
         }
-
-        if (bookingDto.getStart().isAfter(bookingDto.getEnd())) {
-            throw new IllegalArgumentException("Время начала не может быть позже времени окончания.");
-        }
-
+        // Валидация должна происходить до создания booking, чтобы избежать неконсистентности данных
+        BookingValidation(bookingDto,user,item);
         Booking booking = BookingMapper.toBooking(user, item, bookingDto);
-        booking.setStatus(Status.WAITING);
-        Booking bookingCreate = bookingRepository.save(booking);
-        return BookingMapper.toBookingDto(bookingCreate);
+        return BookingMapper.toBookingDto(bookingRepository.save(booking));
     }
 
 
     @Transactional
     @Override
-    public BookingDto update(Long bookingId, Boolean approved, Long userId) {
+    public BookingDto update(Long userId, Long bookingId, Boolean approved) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронирование " + bookingId + " не найдено."));
 
+        // Добавляем проверку на null перед использованием booking.getItem()
         if (booking.getItem() == null) {
             throw new IllegalStateException("Item is null for booking " + bookingId);
         }
@@ -75,9 +73,8 @@ public class BookingServiceImpl implements BookingService {
         return BookingMapper.toBookingDto(bookingRepository.save(booking));
     }
 
-    @Transactional
     @Override
-    public BookingDto getBookingById(Long bookingId, Long userId) {
+    public BookingDto getBookingById(Long userId, Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронирование " + bookingId + " не найдено."));
 
@@ -85,7 +82,12 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException("Просматривать бронирование может только владелец вещи или создатель брони.");
         }
 
-        return BookingMapper.toBookingDto(booking);
+        try {
+            return BookingMapper.toBookingDto(booking);
+        } catch (Exception e) {
+            log.error("Ошибка при маппинге Booking в BookingDto", e);
+            throw new RuntimeException("Ошибка при обработке бронирования.", e);
+        }
     }
 
     @Transactional
@@ -143,4 +145,22 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException("Неизвестный state: " + stateString);
         }
     }
+    private void BookingValidation(BookingDto bookingDto,User user, Item item){
+        if (bookingDto.getItemId() == null) { // Проверяем, что itemId не null
+            throw new IllegalArgumentException("Item ID не может быть null.");
+        }
+
+        if (item == null) { // Проверяем, что item не null
+            throw new NotFoundException("Вещь не найдена.");
+        }
+
+        if (!item.getAvailable()) {
+            throw new IllegalStateException("Вещь недоступна для бронирования.");
+        }
+
+        if (bookingDto.getStart().isAfter(bookingDto.getEnd())) {
+            throw new IllegalArgumentException("Время начала не может быть позже времени окончания.");
+        }
+    }
+// В методе update необходимо убедиться, что Item не null
 }

@@ -8,12 +8,13 @@ import java.util.Collection;
 import java.util.List;
 
 public interface ItemService {
-    ItemDto create(ItemDto itemDto, Long userId);
 
-    ItemDto update(Long itemId, ItemDto itemDto, Long userId);
+    ItemDto create(Long userId, ItemDto itemDto);
+
+    ItemDto update(Long userId,Long itemId, ItemDto itemDto);
 
 
-    ItemDto getItemDtoById(Long itemId, Long userId);
+    ItemDto getItemDtoById(Long userId, Long itemId);
 
     Collection<ItemDto> getAllItemDtoByUserId(Long userId);
 

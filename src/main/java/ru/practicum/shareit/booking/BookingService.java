@@ -10,9 +10,9 @@ public interface BookingService {
     BookingDto create(Long userId, BookingDto bookingDto);
 
     @Transactional
-    BookingDto update(Long bookingId, Boolean approved, Long userId);
+    BookingDto update(Long userId, Long bookingId, Boolean approved);
 
-    BookingDto getBookingById(Long bookingId, Long userId);
+    BookingDto getBookingById(Long userId, Long bookingId);
 
     List<BookingDto> findAll(Long bookerId, String state);
 

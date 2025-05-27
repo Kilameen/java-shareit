@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.utils.Marker;
 
 
 import java.time.LocalDateTime;
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookingDto {
     Long id;
-    @NotNull
+    @NotNull(message = "Вещь не может быть Null",groups = {Marker.OnCreate.class})
     ItemDto item;
     @NotNull
     @FutureOrPresent
@@ -25,13 +26,11 @@ public class BookingDto {
     @NotNull
     @Future
     LocalDateTime end;
+    @NotNull(groups = {Marker.OnCreate.class})
     UserDto booker;
 
     public Long getItemId() {
         return item.getId();
-    }
-    public long getBookerId() {
-        return booker.getId();
     }
 }
 

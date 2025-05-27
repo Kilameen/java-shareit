@@ -11,8 +11,8 @@ import java.util.List;
 public interface ItemRepository extends JpaRepository<Item,Long> {
     List<Item> findByOwner(User owner);
 
-    @Query("SELECT i FROM Item i " +
-            "WHERE (LOWER(i.name) LIKE %:text% OR LOWER(i.description) LIKE %:text%) AND i.available = true")
+
+    @Query("SELECT i FROM Item i WHERE LOWER(i.name) LIKE %:text% OR LOWER(i.description) LIKE %:text%")
     List<Item> searchItems(String text);
 }
 
