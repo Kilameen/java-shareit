@@ -24,15 +24,15 @@ public class Booking {
     LocalDateTime start;
     @Column(name = "end_date", nullable = false)
     LocalDateTime end;
-    @ManyToOne
-    @JoinColumn(name = "item_id", nullable = false)
-    @ToString.Exclude
-    Item item;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    Status status;
     @ManyToOne
     @JoinColumn(name = "booker_id", nullable = false)
     @ToString.Exclude
     User booker;
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    Status status;
+    @ManyToOne
+    @JoinColumn(name = "item_id", nullable = false)
+    @ToString.Exclude
+    Item item;
 }

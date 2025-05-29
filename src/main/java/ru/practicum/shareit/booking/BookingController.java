@@ -12,11 +12,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/bookings")
-@RequiredArgsConstructor // Добавлена аннотация для генерации конструктора с внедрением зависимостей
-@Slf4j // Добавлена аннотация для логирования
+@RequiredArgsConstructor
+@Slf4j
 public class BookingController {
 
     private final BookingService bookingService;
+
     @Validated(Marker.OnCreate.class)
     @PostMapping
     public BookingDto create(@RequestHeader("X-Sharer-User-Id") Long userId,
@@ -27,8 +28,8 @@ public class BookingController {
 
     @PatchMapping("/{bookingId}")
     public BookingDto update(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                   @PathVariable("bookingId") Long bookingId,
-                                   @RequestParam(name = "approved") Boolean approved) {
+                             @PathVariable("bookingId") Long bookingId,
+                             @RequestParam(name = "approved") Boolean approved) {
         return bookingService.update(userId, bookingId, approved); // Исправлено: передаем bookingId и userId
     }
 

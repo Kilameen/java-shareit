@@ -50,9 +50,7 @@ public class ItemServiceImpl implements ItemService {
         UserDto owner = userService.findUserById(userId);
         Item item = ItemMapper.toItem(itemDto);
         item.setOwner((UserMapper.toUser(owner)));
-        Item createdItem = itemRepository.save(item);
-        log.info("Создан предмет с ID: {}", createdItem.getId());
-        return ItemMapper.toItemDto(createdItem);
+        return ItemMapper.toItemDto(itemRepository.save(item));
     }
 
     @Transactional
@@ -79,6 +77,7 @@ public class ItemServiceImpl implements ItemService {
         log.info("Обновлен предмет с ID: {}", itemId);
         return ItemMapper.toItemDto(updatedItem);
     }
+
     @Override
     @Transactional
     public ItemDto getItemDtoById(Long userId, Long itemId) {
@@ -109,12 +108,9 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new NotFoundException("Пользователь с ID " + userId + " не найден."));
 
         List<Item> items = itemRepository.findByOwner(user);
-        // Добавляем проверку на пустой список items, чтобы избежать дальнейшей обработки,
-        // если у пользователя нет предметов
         if (items.isEmpty()) {
-            return Collections.emptyList(); // Возвращаем пустой список, если нет предметов
+            return Collections.emptyList();
         }
-
         List<Booking> bookings = bookingRepository.findAllByItemInAndStatusOrderByStartAsc(items, Status.APPROVED);
 
         Map<Long, List<Booking>> bookingsByItemId = bookings.stream()
@@ -154,12 +150,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public CommentDto createComment(Long userId, CommentDto commentDto, Long itemId){
+    public CommentDto createComment(Long userId, CommentDto commentDto, Long itemId) {
         User user = UserMapper.toUser(userService.findUserById(userId));
         Optional<Item> itemById = itemRepository.findById(itemId);
 
         // Проверяем, существует ли вещь
-        if(itemById.isEmpty()){
+        if (itemById.isEmpty()) {
             throw new NotFoundException("Вещь с id = " + itemId + " не найдена.");
         }
         Item item = itemById.get(); // Теперь безопасно вызывать get(), так как проверка пройдена
@@ -177,10 +173,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
 
-    public List<CommentDto>getItemComments(Long itemId){
-        List<Comment>comments = commentRepository.findAllByItemId(itemId);
+    public List<CommentDto> getItemComments(Long itemId) {
+        List<Comment> comments = commentRepository.findAllByItemId(itemId);
         return comments.stream().map(CommentMapper::toCommentDto).collect(toList());
     }
+
     private BookingDto getLastBooking(List<BookingDto> bookings, LocalDateTime time) {
         if (bookings == null || bookings.isEmpty()) {
             return null;
@@ -204,4 +201,4 @@ public class ItemServiceImpl implements ItemService {
                 .findFirst()
                 .orElse(null);
     }
-    }
+}
