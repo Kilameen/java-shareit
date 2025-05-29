@@ -23,9 +23,8 @@ public class ErrorHandler {
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleGenericException(Exception ex) {
-        // Log the exception for debugging purposes
-        return new ErrorResponse("Произошла непредвиденная ошибка: " , ex.getMessage());
+    public ErrorResponse handleException(final Exception e) {
+        return new ErrorResponse("Произошла непредвиденная ошибка.", e.getMessage()); //Убрал пробел перед запятой
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
