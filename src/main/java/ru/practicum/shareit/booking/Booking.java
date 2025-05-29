@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "bookings")
+@Table(name = "bookings", schema = "public")
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,15 +24,15 @@ public class Booking {
     LocalDateTime start;
     @Column(name = "end_date", nullable = false)
     LocalDateTime end;
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    Status status;
-    @ManyToOne
-    @JoinColumn(name = "booker_id", nullable = false)
-    @ToString.Exclude
-    User booker;
     @ManyToOne
     @JoinColumn(name = "item_id", nullable = false)
     @ToString.Exclude
     Item item;
+    @ManyToOne
+    @JoinColumn(name = "booker_id", nullable = false)
+    @ToString.Exclude
+    User booker;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    Status status;
 }
