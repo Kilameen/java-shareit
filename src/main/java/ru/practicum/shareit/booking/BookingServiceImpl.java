@@ -23,14 +23,13 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional(readOnly = true)
+@Transactional
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final UserService userService;
     private final ItemRepository itemRepository;
 
     @Override
-    @Transactional
     public NewBookingDto create(Long userId, BookingDto bookingDto) {
         User booker = UserMapper.toUser(userService.findUserById(userId));
         Item item = itemRepository.findById(bookingDto.getItemId())
@@ -42,7 +41,6 @@ public class BookingServiceImpl implements BookingService {
         return BookingMapper.toNewBookingDto(bookingRepository.save(booking));
     }
 
-    @Transactional
     @Override
     public NewBookingDto update(Long userId, Long bookingId, Boolean approved) {
         Booking booking = bookingRepository.findById(bookingId)
@@ -61,6 +59,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public NewBookingDto getBookingById(Long userId, Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронирование " + bookingId + " не найдено."));

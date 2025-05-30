@@ -23,4 +23,6 @@ public interface ItemService {
     void deleteItem(Long itemId);
 
     NewCommentDto createComment(Long userId, CommentDto commentDto, Long itemId);
+
+    List<NewCommentDto> getItemComments(Long itemId);
 }

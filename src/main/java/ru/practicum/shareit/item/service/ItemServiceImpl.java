@@ -35,7 +35,7 @@ import static java.util.stream.Collectors.toList;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional(readOnly = true)
+@Transactional
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
@@ -44,7 +44,6 @@ public class ItemServiceImpl implements ItemService {
     private final UserService userService;
     private final CommentRepository commentRepository;
 
-    @Transactional
     @Override
     public NewItemDto create(Long userId, ItemDto itemDto) {
         UserDto owner = userService.findUserById(userId);
@@ -53,7 +52,6 @@ public class ItemServiceImpl implements ItemService {
         return ItemMapper.toNewItemDto(itemRepository.save(item));
     }
 
-    @Transactional
     @Override
     public NewItemDto update(Long userId, Long itemId, ItemDto itemDto) {
         Item existingItem = itemRepository.findById(itemId)
@@ -79,7 +77,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public NewItemDto getItemDtoById(Long userId, Long itemId) {
         userService.findUserById(userId);
         Item item = itemRepository.findById(itemId)
@@ -102,7 +100,7 @@ public class ItemServiceImpl implements ItemService {
         return newItemDto;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public Collection<NewItemDto> getAllItemDtoByUserId(Long userId) {
         User user = userRepository.findById(userId)
@@ -124,6 +122,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<NewItemDto> searchItems(Long userId, String text) {
         userService.findUserById(userId);
         if (text == null || text.isBlank()) {
@@ -137,14 +136,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional
     public void deleteItem(Long itemId) {
         itemRepository.deleteById(itemId);
         log.info("Удален предмет с ID: {}", itemId);
     }
 
     @Override
-    @Transactional
     public NewCommentDto createComment(Long userId, CommentDto commentDto, Long itemId) {
         User user = UserMapper.toUser(userService.findUserById(userId));
         Item item = itemRepository.findById(itemId)
@@ -158,6 +155,7 @@ public class ItemServiceImpl implements ItemService {
 
     }
 
+    @Override
     public List<NewCommentDto> getItemComments(Long itemId) {
         return commentRepository.findAllByItemId(itemId)
                 .stream()
