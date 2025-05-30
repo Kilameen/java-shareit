@@ -1,8 +1,9 @@
 package ru.practicum.shareit.user.model;
 
-import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import jakarta.persistence.*;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Data

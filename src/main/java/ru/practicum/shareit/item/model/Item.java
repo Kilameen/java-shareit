@@ -16,15 +16,16 @@ public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @Column(name = "name", nullable = false)
+    @Column(name = "name",nullable = false)
     String name;
-    @Column(name = "description", nullable = false)
+    @Column(name = "description",nullable = false)
     String description;
-    @Column(name = "is_available", nullable = false)
+    @Column(name = "is_available",nullable = false)
     Boolean available;
     @ManyToOne
-    @JoinColumn(name = "owner_id", nullable = false)
+    @JoinColumn(name = "owner_id",nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     User owner;
+
 }
