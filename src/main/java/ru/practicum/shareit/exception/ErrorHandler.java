@@ -1,30 +1,23 @@
 package ru.practicum.shareit.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RestControllerAdvice
 public class ErrorHandler {
-
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(NotFoundException ex) {
-        return new ErrorResponse("NOT_FOUND",ex.getMessage());
+        return new ErrorResponse("NOT_FOUND", ex.getMessage());
     }
 
     @ExceptionHandler(DuplicatedDataException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleDuplicatedDataException(DuplicatedDataException ex) {
-        return new ErrorResponse("CONFLICT",ex.getMessage());
+        return new ErrorResponse("CONFLICT", ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
@@ -44,5 +37,4 @@ public class ErrorHandler {
     public ErrorResponse handleIllegalStateException(IllegalStateException ex) {
         return new ErrorResponse("BAD_REQUEST", ex.getMessage());
     }
-
 }
