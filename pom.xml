@@ -135,7 +135,7 @@
 					<version>4.7.0.0</version>
 					<configuration>
 						<effort>Max</effort>
-						<threshold>High</threshold>
+						<threshold>Low</threshold> <!-- Изменено на Low -->
 					</configuration>
 					<executions>
 						<execution>
