@@ -1,27 +1,41 @@
 package ru.practicum.shareit.item;
 
+import ru.practicum.shareit.booking.dto.NewBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.NewCommentDto;
+import ru.practicum.shareit.item.dto.NewItemDto;
 import ru.practicum.shareit.item.model.Item;
 
+import java.util.List;
+
 public class ItemMapper {
-    public static ItemDto toItemDto(Item item) {
-        return ItemDto.builder()
+
+    public static Item toItem(ItemDto itemDto) {
+        return Item.builder()
+                .name(itemDto.getName()) // Название предмета
+                .description(itemDto.getDescription()) // Описание предмета
+                .available(itemDto.getAvailable()) // Доступность предмета
+                .build();
+    }
+
+    public static NewItemDto toNewItemDto(Item item, NewBookingDto lastBooking, List<NewCommentDto> comments, NewBookingDto nextBooking) {
+        return NewItemDto.builder()
                 .id(item.getId())
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getAvailable())
-                .request(item.getRequest() != null ? item.getRequest() : null)
+                .lastBooking(lastBooking)
+                .comments(comments)
+                .nextBooking(nextBooking)
                 .build();
     }
 
-    public static Item toItem(ItemDto itemDto) {
-        return Item.builder()
-                .id(itemDto.getId())
-                .name(itemDto.getName())
-                .description(itemDto.getDescription())
-                .available(itemDto.getAvailable())
-                .request(itemDto.getRequest() != null ? itemDto.getRequest() : null)
+    public static NewItemDto toNewItemDto(Item item) {
+        return NewItemDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
                 .build();
     }
-
 }
