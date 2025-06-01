@@ -39,7 +39,6 @@ public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
 
-
     @Override
     public ItemDto create(Long userId, ItemCreateDto itemCreateDto) {
         User owner = userRepository.findById(userId)
@@ -152,14 +151,16 @@ public class ItemServiceImpl implements ItemService {
 
         Comment comment = CommentMapper.toComment(commentCreateDto, item, user);
         Comment savedComment = commentRepository.save(comment);
+        log.info("Создан комментарий с ID: {} для item ID: {}", savedComment.getId(), itemId);
 
         return CommentMapper.toCommentDto(savedComment);
     }
 
     @Override
     public List<CommentDto> getItemComments(Long itemId) {
-        return commentRepository.findAllByItemId(itemId)
-                .stream()
+        List<Comment> comments = commentRepository.findAllByItemId(itemId);
+        log.info("Найдено {} комментариев для item ID: {}", comments.size(), itemId);
+        return comments.stream()
                 .map(CommentMapper::toCommentDto)
                 .collect(toList());
     }
