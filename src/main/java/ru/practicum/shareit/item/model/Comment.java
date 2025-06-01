@@ -38,8 +38,3 @@ public class Comment {
     @CreationTimestamp
     LocalDateTime created;
 }
-
-
-
-
-

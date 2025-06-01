@@ -1,41 +1,27 @@
 package ru.practicum.shareit.item;
 
-import ru.practicum.shareit.booking.dto.NewBookingDto;
+import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.NewCommentDto;
-import ru.practicum.shareit.item.dto.NewItemDto;
 import ru.practicum.shareit.item.model.Item;
-
-import java.util.List;
+import ru.practicum.shareit.user.UserMapper;
 
 public class ItemMapper {
 
-    public static Item toItem(ItemDto itemDto) {
+    public static Item toItemFromCreateDto(ItemCreateDto itemCreateDto) {
         return Item.builder()
-                .name(itemDto.getName()) // Название предмета
-                .description(itemDto.getDescription()) // Описание предмета
-                .available(itemDto.getAvailable()) // Доступность предмета
+                .name(itemCreateDto.getName())
+                .description(itemCreateDto.getDescription())
+                .available(itemCreateDto.getAvailable())
                 .build();
     }
 
-    public static NewItemDto toNewItemDto(Item item, NewBookingDto lastBooking, List<NewCommentDto> comments, NewBookingDto nextBooking) {
-        return NewItemDto.builder()
+    public static ItemDto toItemFromDto(Item item) {
+        return ItemDto.builder()
                 .id(item.getId())
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getAvailable())
-                .lastBooking(lastBooking)
-                .comments(comments)
-                .nextBooking(nextBooking)
-                .build();
-    }
-
-    public static NewItemDto toNewItemDto(Item item) {
-        return NewItemDto.builder()
-                .id(item.getId())
-                .name(item.getName())
-                .description(item.getDescription())
-                .available(item.getAvailable())
+                .owner(UserMapper.toUserDto(item.getOwner()))
                 .build();
     }
 }

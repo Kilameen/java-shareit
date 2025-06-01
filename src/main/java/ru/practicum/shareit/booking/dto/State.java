@@ -1,6 +1,6 @@
 package ru.practicum.shareit.booking.dto;
 
-import java.util.Arrays;
+import jakarta.validation.ValidationException;
 
 public enum State {
     ALL,
@@ -10,10 +10,11 @@ public enum State {
     WAITING,
     REJECTED;
 
-    public static State from(String bookingState) {
-        return Arrays.stream(State.values())
-                .filter(value -> value.name().equals(bookingState))
-                .findFirst()
-                .orElse(null);
+    public static State parseState(String stateString) {
+        try {
+            return State.valueOf(stateString.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ValidationException("Неизвестный state: " + stateString);
+        }
     }
 }

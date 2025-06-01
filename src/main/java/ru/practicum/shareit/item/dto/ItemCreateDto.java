@@ -2,18 +2,21 @@ package ru.practicum.shareit.item.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
+import lombok.AccessLevel;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ItemCreateDto {
-    @NotBlank(message = "Название не может быть пустым")
-    private String name;
-    @NotBlank(message = "Описание не может быть пустым")
-    private String description;
-    @NotNull(message = "Статус доступности должен быть указан")
-    private Boolean available;
+
+    @NotBlank(message = "Название товара не может быть пустым или содержать только пробелы")
+    String name;
+
+    @NotBlank(message = "Описание товара не может быть пустым или содержать только пробелы")
+    String description;
+
+    @NotNull(message = "Статус о том, доступна или нет вещь для аренды обязателен")
+    Boolean available;
+    Long owner;
 }
