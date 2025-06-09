@@ -1,5 +1,6 @@
 package ru.practicum.shareit.request.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;

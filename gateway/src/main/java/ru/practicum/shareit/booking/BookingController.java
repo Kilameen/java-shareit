@@ -1,15 +1,10 @@
 package ru.practicum.shareit.booking;
 
+import jakarta.validation.constraints.Min;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -44,6 +39,17 @@ public class BookingController {
                                            @RequestBody @Valid BookItemRequestDto requestDto) {
         log.info("Creating booking {}, userId={}", requestDto, userId);
         return bookingClient.bookItem(userId, requestDto);
+    }
+
+    @GetMapping("/owner")
+    public ResponseEntity<Object> getAllOwner(@RequestHeader("X-Sharer-User-Id") Long ownerId,
+                                              @RequestParam(value = "state", defaultValue = "ALL") String bookingState,
+                                              @RequestParam(value = "from", defaultValue = "0") @Min(0) Integer from,
+                                              @RequestParam(value = "size", defaultValue = "10") @Min(1) Integer size) {
+        BookingState state = BookingState.from(bookingState)
+                .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + bookingState));
+        log.info("GET запрос на получение списка всех бронирований c state {}, userId={}, from={}, size={}", bookingState, ownerId, from, size);
+        return bookingClient.getAllOwner(ownerId, state, from, size);
     }
 
     @GetMapping("/{bookingId}")

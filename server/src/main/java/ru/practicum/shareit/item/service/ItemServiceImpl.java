@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,14 +10,12 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.item.CommentMapper;
-import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.*;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.CommentRepository;
-import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.request.ItemRequestRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -48,7 +47,9 @@ public class ItemServiceImpl implements ItemService {
         Item item = ItemMapper.toItemFromCreateDto(itemCreateDto);
         item.setOwner(owner);
         if (itemCreateDto.getRequestId() != null) {
-            item.setRequest(itemRequestRepository.getReferenceById(itemCreateDto.getRequestId()));
+            ItemRequest itemRequest = itemRequestRepository.findById(itemCreateDto.getRequestId())
+                    .orElseThrow(() -> new EntityNotFoundException("Запроса на данный предмет не существует"));
+            item.setRequest(itemRequest);
         }
         return ItemMapper.toItemFromDto(itemRepository.save(item));
     }

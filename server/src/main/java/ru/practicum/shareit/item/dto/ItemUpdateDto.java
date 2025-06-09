@@ -10,6 +10,5 @@ public class ItemUpdateDto {
     String name;
     String description;
     Boolean available;
-    Long owner;
     Long requestId;
 }

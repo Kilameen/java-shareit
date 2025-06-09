@@ -13,20 +13,17 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-@Validated
 public class UserController {
 
     private final UserService userService;
 
     @PostMapping
-    @Validated(Marker.OnCreate.class)
-    public UserDto create(@Valid @RequestBody UserDto userDto) {
+    public UserDto create(@RequestBody UserDto userDto) {
         return userService.create(userDto);
     }
 
     @PatchMapping("/{id}")
-    @Validated(Marker.OnUpdate.class)
-    public UserDto update(@PathVariable Long id, @Valid @RequestBody UserDto userDto) {
+    public UserDto update(@PathVariable Long id, @RequestBody UserDto userDto) {
         return userService.update(id, userDto);
     }
 

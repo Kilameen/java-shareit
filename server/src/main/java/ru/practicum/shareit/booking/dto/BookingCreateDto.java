@@ -16,13 +16,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookingCreateDto {
-    @NotNull
-    @FutureOrPresent
     LocalDateTime start;
-    @NotNull
-    @Future
     LocalDateTime end;
-    @NotNull
     Long itemId;
     Long bookerId;
     Status status;

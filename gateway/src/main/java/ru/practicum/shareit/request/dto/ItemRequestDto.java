@@ -1,7 +1,6 @@
 package ru.practicum.shareit.request.dto;
 
 import jakarta.validation.constraints.NotBlank;
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -10,8 +9,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ItemRequestCreateDto {
-
+public class ItemRequestDto {
+    @NotBlank
     String description;
 
 }
