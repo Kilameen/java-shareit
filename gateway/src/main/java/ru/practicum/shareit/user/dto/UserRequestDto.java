@@ -12,7 +12,6 @@ import ru.practicum.shareit.utils.Marker;
 @NoArgsConstructor
 @Builder
 public class UserRequestDto {
-    Long id;
     @NotBlank(message = "Имя пользователя не может быть пустым", groups = {Marker.OnCreate.class})
     String name;
     @Email(message = "Невалидный email", groups = {Marker.OnCreate.class, Marker.OnUpdate.class})

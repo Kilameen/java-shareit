@@ -22,9 +22,7 @@ public class ItemController {
     public ResponseEntity<Object> create(@RequestHeader("X-Sharer-User-Id") Long userId,
                                          @Valid @RequestBody ItemCreateDto itemDto) {
         log.info("POST запрос на создание новой вещи: {} от пользователя c id: {}", itemDto, userId);
-        ResponseEntity<Object> response = itemClient.create(userId, itemDto);
-        log.info("Ответ от ItemClient: {}", response); // Добавлено логирование
-        return response;
+        return itemClient.create(userId,itemDto);
     }
 
     @PatchMapping("/{itemId}")

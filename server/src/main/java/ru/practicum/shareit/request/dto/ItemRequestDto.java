@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -23,5 +24,5 @@ public class ItemRequestDto {
     String description;
     User requester;
     LocalDateTime created;
-    List<Item> items = new ArrayList<>();
+    List<ItemDto> items = new ArrayList<>();
 }

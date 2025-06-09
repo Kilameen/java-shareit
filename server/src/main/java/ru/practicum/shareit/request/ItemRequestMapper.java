@@ -1,8 +1,10 @@
 package ru.practicum.shareit.request;
 
+import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.user.model.User;
 
 public class ItemRequestMapper {
 
@@ -20,7 +22,7 @@ public class ItemRequestMapper {
                 .description(itemRequest.getDescription())
                 .requester(itemRequest.getRequester())
                 .created(itemRequest.getCreated())
-                .items(itemRequest.getItems())
+                .items(itemRequest)
                 .build();
     }
 }

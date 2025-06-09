@@ -25,10 +25,10 @@ public class UserController {
         return userClient.create(user);
     }
     @Validated(Marker.OnUpdate.class)
-    @PatchMapping("/{userId}")
-    public ResponseEntity<Object> update(@Valid @RequestBody UserRequestDto userDto, @PathVariable Long userId) {
-        log.info("PATCH запрос на обновление пользователя c id: {}", userId);
-        return userClient.update(userId, userDto);
+    @PatchMapping("/{id}")
+    public ResponseEntity<Object> update(@Valid @RequestBody UserRequestDto userDto, @PathVariable Long id) {
+        log.info("PATCH запрос на обновление пользователя c id: {}", id);
+        return userClient.update(id, userDto);
     }
 
     @GetMapping
@@ -37,15 +37,15 @@ public class UserController {
         return userClient.findAll();
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<Object> findById(@PathVariable Long userId) {
-        log.info("GET запрос на получение пользователя c id: {}", userId);
-        return userClient.findById(userId);
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> findById(@PathVariable Long id) {
+        log.info("GET запрос на получение пользователя c id: {}", id);
+        return userClient.findById(id);
     }
 
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<Object> delete(@PathVariable long userId) {
-        log.info("DELETE запрос на удаление пользователя с id: {}", userId);
-        return userClient.deleteById(userId);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> delete(@PathVariable Long id) {
+        log.info("DELETE запрос на удаление пользователя с id: {}", id);
+        return userClient.deleteById(id);
     }
 }

@@ -30,7 +30,7 @@ public class ItemRequest {
     @CreationTimestamp
     @Column(name = "created",nullable = false)
     LocalDateTime created;
-    @OneToMany
+    @OneToMany(mappedBy = "request")
     @JoinColumn(name = "request_id")
     List<Item> items = new ArrayList<>();
 }
