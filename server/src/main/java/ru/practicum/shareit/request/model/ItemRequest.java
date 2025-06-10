@@ -28,9 +28,9 @@ public class ItemRequest {
     @JoinColumn(name = "requester_id",nullable = false)
     User requester;
     @CreationTimestamp
-    @Column(name = "created",nullable = false)
+    @Column(name = "created")
     LocalDateTime created;
+
     @OneToMany(mappedBy = "request")
-    @JoinColumn(name = "request_id")
-    List<Item> items = new ArrayList<>();
+    List<Item> items;
 }

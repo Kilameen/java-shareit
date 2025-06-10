@@ -22,7 +22,6 @@ import java.util.List;
 public class ItemRequestDto {
     Long id;
     String description;
-    User requester;
     LocalDateTime created;
-    List<ItemDto> items = new ArrayList<>();
+    List<ItemDto> items;
 }

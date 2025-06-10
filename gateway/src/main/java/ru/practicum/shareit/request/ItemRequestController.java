@@ -8,21 +8,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
 
 
-@Controller
+@RestController
 @RequestMapping(path = "/requests")
 @RequiredArgsConstructor
 @Slf4j
-@Validated
-public class RequestController {
+public class ItemRequestController {
 
     private final RequestClient requestClient;
 
     @PostMapping
-    public ResponseEntity<Object> add(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                      @Valid @RequestBody ItemRequestDto requestDto) {
+    public ResponseEntity<Object> create(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                      @Valid @RequestBody ItemRequestCreateDto requestDto) {
         return requestClient.create(userId, requestDto);
     }
 

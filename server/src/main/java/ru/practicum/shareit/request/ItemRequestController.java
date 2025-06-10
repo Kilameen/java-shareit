@@ -12,28 +12,31 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor
 @RequestMapping(path = "/requests")
+@RequiredArgsConstructor
 public class ItemRequestController {
     ItemRequestService itemRequestService;
 
     @PostMapping
     public ItemRequestDto create(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                 @Valid @RequestBody ItemRequestCreateDto itemRequestCreateDto) {
+                                 @RequestBody ItemRequestCreateDto itemRequestCreateDto) {
         log.info("Добавлен новый запрос вещи от пользователя с ID {}", userId);
         return itemRequestService.create(userId, itemRequestCreateDto);
     }
 
     @GetMapping("/{requestId}")
-    public ItemRequestDto getRequestById(@PathVariable Long requestId) {
+    public ItemRequestDto getRequestById(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                         @PathVariable Long requestId){
         log.info("Получены данные об одном конкретном запросе c ID {}",requestId);
-        return itemRequestService.getAllRequestById(requestId);
+        return itemRequestService.getAllRequestById(userId, requestId);
     }
 
-    @GetMapping("/all")
-    public List<ItemRequestDto> getAllRequests() {
-        log.info("Получен список запросов, созданных другими пользователями.");
-        return itemRequestService.getAllRequests();
+    @GetMapping("/all") // Endpoint для получения всех запросов (с пагинацией)
+    public List<ItemRequestDto> getAllRequests(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                               @RequestParam(defaultValue = "0") Integer from,
+                                               @RequestParam(defaultValue = "10") Integer size) {
+        log.info("Получен список запросов, созданных другими пользователями."); // Логируем действие
+        return itemRequestService.getAllRequests(userId, from, size); // Вызываем сервис для получения всех запросов
     }
 
     @GetMapping
