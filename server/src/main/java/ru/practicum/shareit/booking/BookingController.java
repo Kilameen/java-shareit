@@ -27,8 +27,8 @@ public class BookingController {
 
     @PatchMapping("/{bookingId}")
     public BookingDto update(@RequestHeader("X-Sharer-User-Id") Long userId,
-                             @PathVariable("bookingId") Long bookingId,
-                             @RequestParam(name = "approved") Boolean approved) {
+                             @PathVariable Long bookingId,
+                             @RequestParam Boolean approved) {
         return bookingService.update(userId, bookingId, approved);
     }
 
@@ -41,15 +41,19 @@ public class BookingController {
 
     @GetMapping
     public List<BookingDto> findAll(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                    @RequestParam(value = "state", defaultValue = "ALL") String bookingState) {
+                                    @RequestParam(value = "state", defaultValue = "ALL") String bookingState,
+                                    @RequestParam(defaultValue = "0") Integer from,
+                                    @RequestParam(defaultValue = "10") Integer size) {
         log.info("GET запрос на получение списка всех бронирований текущего пользователя с id: {} и статусом {}", userId, bookingState);
-        return bookingService.findAll(userId, bookingState);
+        return bookingService.findAll(userId, bookingState,from,size);
     }
 
     @GetMapping("/owner")
     public List<BookingDto> getAllOwner(@RequestHeader("X-Sharer-User-Id") Long ownerId,
-                                        @RequestParam(value = "state", defaultValue = "ALL") String bookingState) {
+                                        @RequestParam(value = "state", defaultValue = "ALL") String bookingState,
+                                        @RequestParam(defaultValue = "0") Integer from,
+                                        @RequestParam(defaultValue = "10") Integer size) {
         log.info("GET запрос на получение списка всех бронирований текущего владельца с id: {} и статусом {}", ownerId, bookingState);
-        return bookingService.getOwnerBookings(ownerId, bookingState);
+        return bookingService.getOwnerBookings(ownerId, bookingState,from,size);
     }
 }

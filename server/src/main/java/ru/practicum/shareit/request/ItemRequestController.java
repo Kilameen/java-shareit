@@ -15,7 +15,7 @@ import java.util.List;
 @RequestMapping(path = "/requests")
 @RequiredArgsConstructor
 public class ItemRequestController {
-    ItemRequestService itemRequestService;
+    private final ItemRequestService itemRequestService;
 
     @PostMapping
     public ItemRequestDto create(@RequestHeader("X-Sharer-User-Id") Long userId,
@@ -25,10 +25,9 @@ public class ItemRequestController {
     }
 
     @GetMapping("/{requestId}")
-    public ItemRequestDto getRequestById(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                         @PathVariable Long requestId){
+    public ItemRequestDto getRequestById(@PathVariable Long requestId){
         log.info("Получены данные об одном конкретном запросе c ID {}",requestId);
-        return itemRequestService.getAllRequestById(userId, requestId);
+        return itemRequestService.getAllRequestById(requestId);
     }
 
     @GetMapping("/all") // Endpoint для получения всех запросов (с пагинацией)

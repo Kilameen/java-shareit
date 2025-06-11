@@ -4,7 +4,12 @@ import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.ItemRequestMapper;
+import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserMapper;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ItemMapper {
 
@@ -27,5 +32,10 @@ public class ItemMapper {
                 .owner(UserMapper.toUserDto(item.getOwner()))
                 .requestId(requestId)
                 .build();
+    }
+    public static List<ItemDto> toItemProposedDtoList(List<Item> items) {
+        return items.stream()
+                .map(ItemMapper::toItemFromDto)
+                .collect(Collectors.toList());
     }
 }

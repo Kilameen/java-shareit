@@ -78,7 +78,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public ItemDto getItemDtoById(Long userId, Long itemId) {
+    public ItemDto getItemDtoById(Long itemId,Long userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с ID " + userId + " не найден."));
 
@@ -86,7 +86,8 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new NotFoundException("Вещь с id = " + itemId + " не найдена."));
 
         ItemDto newItemDto = ItemMapper.toItemFromDto(item);
-        newItemDto.setComments(getItemComments(itemId));
+        List<CommentDto> comments = getItemComments(itemId);
+        newItemDto.setComments(comments);
 
         if (item.getOwner().getId().equals(userId)) {
             List<Booking> bookings = bookingRepository.findAllByItemAndStatusOrderByStartAsc(item, Status.APPROVED);

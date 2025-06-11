@@ -34,9 +34,10 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ResponseEntity<Object> findItemByUserId(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ResponseEntity<Object> findItemById(@RequestHeader("X-Sharer-User-Id") Long requesterId,
+                                               @PathVariable Long itemId) {
         log.info("GET запрос на получение вещи");
-        return itemClient.findItemByUserId(userId);
+        return itemClient.findItemById(itemId,requesterId);
     }
 
     @GetMapping
@@ -54,7 +55,7 @@ public class ItemController {
 
     @PostMapping("/{itemId}/comment")
     public ResponseEntity<Object> createComment(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                @Validated @RequestBody CommentRequestDto commentDto,
+                                                @Valid @RequestBody CommentRequestDto commentDto,
                                                 @PathVariable Long itemId) {
         return itemClient.createComment(userId, commentDto, itemId);
     }

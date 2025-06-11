@@ -5,19 +5,18 @@ import java.time.LocalDateTime;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-@Getter
+import ru.practicum.shareit.item.dto.ItemCreateDto;
+import ru.practicum.shareit.user.dto.UserRequestDto;
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookItemRequestDto {
-     long itemId;
-     @NotNull
+   @NotNull
+    Long itemId;
+    @NotNull
     @FutureOrPresent
      LocalDateTime start;
      @NotNull

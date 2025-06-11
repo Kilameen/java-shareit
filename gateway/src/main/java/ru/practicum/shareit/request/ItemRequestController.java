@@ -5,8 +5,6 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
 
@@ -38,8 +36,7 @@ public class ItemRequestController {
     }
 
     @GetMapping("/{requestId}")
-    public ResponseEntity<Object> get(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                      @PathVariable Long requestId) {
-        return requestClient.findRequestById(userId, requestId);
+    public ResponseEntity<Object> get(@PathVariable Long requestId) {
+        return requestClient.findRequestById(requestId);
     }
 }
