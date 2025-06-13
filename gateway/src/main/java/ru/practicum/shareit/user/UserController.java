@@ -20,10 +20,11 @@ public class UserController {
 
     @Validated(Marker.OnCreate.class)
     @PostMapping
-    public ResponseEntity<Object> add(@Valid @RequestBody UserRequestDto user) {
-        log.info("POST запрос на создание пользователя: {}", user);
-        return userClient.create(user);
+    public ResponseEntity<Object> create(@Valid @RequestBody UserRequestDto userRequestDto) {
+        log.info("POST запрос на создание пользователя: {}", userRequestDto);
+        return userClient.create(userRequestDto);
     }
+
     @Validated(Marker.OnUpdate.class)
     @PatchMapping("/{id}")
     public ResponseEntity<Object> update(@Valid @RequestBody UserRequestDto userDto, @PathVariable Long id) {

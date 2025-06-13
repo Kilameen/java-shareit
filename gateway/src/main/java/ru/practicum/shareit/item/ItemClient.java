@@ -41,13 +41,14 @@ public class ItemClient extends BaseClient {
         return get("/" + itemId, requesterId);
     }
 
-    public ResponseEntity<Object> findItemByUserId(Long userId) {
-        return get("/" , userId, null);
-    }
 
     public ResponseEntity<Object> findAll(Long userId) {
 
         return get("", userId, null);
+    }
+
+    public ResponseEntity<Object> deleteById(Long itemId) {
+        return delete("/" + itemId);
     }
 
     public ResponseEntity<Object> searchItems(Long userId, String text) {
@@ -66,5 +67,4 @@ public class ItemClient extends BaseClient {
     public ResponseEntity<Object> createComment(Long userId, CommentRequestDto commentDto, Long itemId) {
         return post("/" + itemId + "/comment", userId, commentDto);
     }
-
 }

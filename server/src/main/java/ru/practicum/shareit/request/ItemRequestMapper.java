@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ItemRequestMapper {
 
-    public static ItemRequest toItemRequestFromCreateDto(User user,ItemRequestCreateDto itemRequestCreateDto) {
+    public static ItemRequest toItemRequestFromCreateDto(User user, ItemRequestCreateDto itemRequestCreateDto) {
         return ItemRequest.builder()
                 .id(itemRequestCreateDto.getId())
                 .description(itemRequestCreateDto.getDescription())
@@ -18,7 +18,7 @@ public class ItemRequestMapper {
                 .build();
     }
 
-    public static ItemRequestDto toItemRequestDto(ItemRequest itemRequest){
+    public static ItemRequestDto toItemRequestDto(ItemRequest itemRequest) {
         return ItemRequestDto.builder()
                 .id(itemRequest.getId())
                 .description(itemRequest.getDescription())
@@ -26,8 +26,7 @@ public class ItemRequestMapper {
                 .build();
     }
 
-    public static ItemRequestDto toItemRequestWithItemDto(ItemRequest itemRequest,  List<ItemDto> items) {
-
+    public static ItemRequestDto toItemRequestWithItemDto(ItemRequest itemRequest, List<ItemDto> items) {
         return ItemRequestDto.builder()
                 .id(itemRequest.getId())
                 .description(itemRequest.getDescription())
@@ -35,5 +34,4 @@ public class ItemRequestMapper {
                 .items(items)
                 .build();
     }
-
 }

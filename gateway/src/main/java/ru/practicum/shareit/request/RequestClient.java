@@ -35,7 +35,7 @@ public class RequestClient extends BaseClient {
         return get("", userId);
     }
 
-    public ResponseEntity<Object>findAllRequests(Long userId, Integer from, Integer size) {
+    public ResponseEntity<Object> findAllRequests(Long userId, Integer from, Integer size) {
         Map<String, Object> parameters = Map.of(
                 "from", from,
                 "size", size

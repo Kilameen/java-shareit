@@ -1,14 +1,20 @@
 package ru.practicum.shareit.booking.dto;
 
-import jakarta.validation.ValidationException;
+import ru.practicum.shareit.exception.ValidationException;
 
 public enum State {
+    // Все
     ALL,
+    // Текущие
     CURRENT,
-    PAST,
+    // Будущие
     FUTURE,
-    WAITING,
-    REJECTED;
+    // Завершенные
+    PAST,
+    // Отклоненные
+    REJECTED,
+    // Ожидающие подтверждения
+    WAITING;
 
     public static State parseState(String stateString) {
         try {

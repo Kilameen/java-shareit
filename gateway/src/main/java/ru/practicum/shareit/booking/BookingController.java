@@ -3,7 +3,6 @@ package ru.practicum.shareit.booking;
 import jakarta.validation.constraints.Min;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -11,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.practicum.shareit.booking.dto.BookItemRequestDto;
 import ru.practicum.shareit.booking.dto.BookingState;
+import ru.practicum.shareit.utils.Constants;
 
 @RestController
 @RequestMapping(path = "/bookings")
@@ -20,22 +20,22 @@ public class BookingController {
     private final BookingClient bookingClient;
 
     @PostMapping
-    public ResponseEntity<Object> create(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ResponseEntity<Object> create(@RequestHeader(Constants.USER_ID_HEADER) Long userId,
                                          @Valid @RequestBody BookItemRequestDto requestDto) {
         log.info("POST запрос на создание нового бронирования вещи от пользователя c id: {} ", userId);
         return bookingClient.create(userId, requestDto);
     }
 
     @PatchMapping("/{bookingId}")
-    public ResponseEntity<Object> update(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                          @PathVariable Long bookingId,
-                                          @RequestParam Boolean approved) {
+    public ResponseEntity<Object> update(@RequestHeader(Constants.USER_ID_HEADER) Long userId,
+                                         @PathVariable Long bookingId,
+                                         @RequestParam Boolean approved) {
         log.info("PATCH запрос на обновление бронирования вещи от пользователя c id: {} ", userId);
         return bookingClient.update(userId, bookingId, approved);
     }
 
     @GetMapping
-    public ResponseEntity<Object> getBookings(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ResponseEntity<Object> getBookings(@RequestHeader(Constants.USER_ID_HEADER) Long userId,
                                               @RequestParam(name = "state", defaultValue = "ALL") String stateParam,
                                               @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
                                               @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
@@ -46,7 +46,7 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    public ResponseEntity<Object> getAllOwner(@RequestHeader("X-Sharer-User-Id") Long ownerId,
+    public ResponseEntity<Object> getAllOwner(@RequestHeader(Constants.USER_ID_HEADER) Long ownerId,
                                               @RequestParam(value = "state", defaultValue = "ALL") String bookingState,
                                               @RequestParam(value = "from", defaultValue = "0") @Min(0) Integer from,
                                               @RequestParam(value = "size", defaultValue = "10") @Min(1) Integer size) {
@@ -57,7 +57,7 @@ public class BookingController {
     }
 
     @GetMapping("/{bookingId}")
-    public ResponseEntity<Object> getBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ResponseEntity<Object> getBooking(@RequestHeader(Constants.USER_ID_HEADER) Long userId,
                                              @PathVariable Long bookingId) {
         log.info("GET запрос на получение данных о  бронировании {} от пользователя с id: {}", bookingId, userId);
         return bookingClient.getBooking(userId, bookingId);

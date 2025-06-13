@@ -5,7 +5,6 @@ import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.user.dto.UserDto;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)

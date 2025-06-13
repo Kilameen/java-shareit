@@ -32,7 +32,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     private final UserRepository userRepository;
     private final ItemRequestRepository itemRequestRepository;
-private final ItemRepository itemRepository;
+    private final ItemRepository itemRepository;
+
     @Override
     public ItemRequestDto create(Long userId, ItemRequestCreateDto itemRequestCreateDto) {
         User requester = userRepository.findById(userId)
@@ -43,8 +44,8 @@ private final ItemRepository itemRepository;
         itemRequest.setCreated(LocalDateTime.now());
 
         log.info("Создан новый запрос от пользователя {}", userId);
-            ItemRequest savedItemRequest = itemRequestRepository.save(itemRequest);
-            return ItemRequestMapper.toItemRequestDto(savedItemRequest);
+        ItemRequest savedItemRequest = itemRequestRepository.save(itemRequest);
+        return ItemRequestMapper.toItemRequestDto(savedItemRequest);
     }
 
     @Transactional(readOnly = true)
@@ -63,7 +64,7 @@ private final ItemRepository itemRepository;
     @Transactional(readOnly = true)
     @Override
     public List<ItemRequestDto> getAllRequests(Long userId, Integer from, Integer size) {
-         userRepository.findById(userId)
+        userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с ID " + userId + " не найден."));
 
         int page = from > 0 ? from / size : 0;
@@ -88,6 +89,4 @@ private final ItemRepository itemRepository;
                 itemRepository.findByRequestId(requestId));
         return ItemRequestMapper.toItemRequestWithItemDto(itemRequest, proposedItems);
     }
-
-
 }
