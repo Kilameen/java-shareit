@@ -30,7 +30,7 @@ class UserControllerTest {
 
         when(userClient.create(userDto)).thenReturn(expectedResponse);
 
-        ResponseEntity<Object> actualResponse = userController.add(userDto);
+        ResponseEntity<Object> actualResponse = userController.create(userDto);
 
         assertEquals(expectedResponse, actualResponse);
         verify(userClient, times(1)).create(userDto);

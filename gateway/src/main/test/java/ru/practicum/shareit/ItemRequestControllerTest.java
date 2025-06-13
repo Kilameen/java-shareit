@@ -69,7 +69,7 @@ class ItemRequestControllerTest {
         ResponseEntity<Object> expectedResponse = new ResponseEntity<>("Запрос по ID", HttpStatus.OK);
         when(requestClient.findRequestById(requestId)).thenReturn(expectedResponse);
 
-        ResponseEntity<Object> actualResponse = itemRequestController.get(requestId);
+        ResponseEntity<Object> actualResponse = itemRequestController.findRequestById(requestId);
 
         assertEquals(expectedResponse, actualResponse);
         verify(requestClient, times(1)).findRequestById(requestId);
