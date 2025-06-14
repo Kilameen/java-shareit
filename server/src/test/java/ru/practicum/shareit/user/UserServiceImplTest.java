@@ -1,4 +1,4 @@
-package ru.practicum.shareit.service;
+package ru.practicum.shareit.user;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -7,13 +7,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.UserMapper;
-import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -84,5 +84,43 @@ public class UserServiceImplTest {
         Long userId = 1L;
         userService.delete(userId);
         verify(userRepository, times(1)).deleteById(userId);
+    }
+
+    @Test
+    void findUserByIdWhenUserFound() {
+        Long userId = 1L;
+        User expectedUser = User.builder().id(1L).name("Test").email("test@yandex.ru").build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(expectedUser));
+        UserDto expectedUserDto = UserMapper.toUserDto(expectedUser);
+
+        UserDto actualUserDto = userService.findUserById(userId);
+
+        assertEquals(expectedUserDto, actualUserDto);
+    }
+
+    @Test
+    void findUserByIdWhenUserNotFound() {
+        Long userId = 0L;
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        NotFoundException userNotFoundException = assertThrows(NotFoundException.class,
+                () -> userService.findUserById(userId));
+
+        assertEquals(userNotFoundException.getMessage(), "Пользователь с id " + userId + " не найден");
+    }
+
+    @Test
+    void findAllUsersTest() {
+        List<User> expectedUsers = List.of(new User());
+        List<UserDto> expectedUserDto = expectedUsers.stream()
+                .map(UserMapper::toUserDto)
+                .collect(Collectors.toList());
+
+        when(userRepository.findAll()).thenReturn(expectedUsers);
+
+        List<UserDto> actualUsersDto = userService.findAll();
+
+        assertEquals(actualUsersDto.size(), 1);
+        assertEquals(actualUsersDto, expectedUserDto);
     }
 }
