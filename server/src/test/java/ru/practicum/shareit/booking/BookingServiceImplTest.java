@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -6,23 +6,28 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
+import ru.practicum.shareit.booking.BookingMapper;
+import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
-import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.State;
 import ru.practicum.shareit.booking.dto.Status;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.service.BookingServiceImpl;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,58 +35,137 @@ class BookingServiceImplTest {
 
     @Mock
     private BookingRepository bookingRepository;
+
     @Mock
     private UserRepository userRepository;
+
     @Mock
     private ItemRepository itemRepository;
+
     @InjectMocks
     private BookingServiceImpl bookingService;
 
     private User booker;
+    private User owner;
     private Item item;
-    private Booking booking;
     private BookingCreateDto bookingCreateDto;
+    private Booking booking;
 
     @BeforeEach
     void setUp() {
-        booker = User.builder().id(1L).name("Booker").email("booker@yandex.ru").build();
-        item = Item.builder().id(1L).name("Item").description("Description").available(true).owner(booker).build();
-        LocalDateTime start = LocalDateTime.now().plusDays(1);
-        LocalDateTime end = LocalDateTime.now().plusDays(2);
-        bookingCreateDto = BookingCreateDto.builder().itemId(1L).start(start).end(end).build();
-        booking = Booking.builder().id(1L).start(start).end(end).item(item).booker(booker).status(Status.WAITING).build();
+        booker = new User();
+        booker.setId(1L);
+        booker.setName("Booker");
+        booker.setEmail("booker@example.com");
+
+        owner = new User();
+        owner.setId(2L);
+        owner.setName("Owner");
+        owner.setEmail("owner@example.com");
+
+        item = new Item();
+        item.setId(3L);
+        item.setName("Item");
+        item.setDescription("Description");
+        item.setAvailable(true);
+        item.setOwner(owner);
+
+        bookingCreateDto = new BookingCreateDto();
+        bookingCreateDto.setItemId(item.getId());
+        bookingCreateDto.setStart(LocalDateTime.now().plusDays(1));
+        bookingCreateDto.setEnd(LocalDateTime.now().plusDays(2));
+
+        booking = BookingMapper.toBookingFromCreateDto(bookingCreateDto, item, booker);
+        booking.setId(4L);
+        booking.setItem(item);
+        booking.setBooker(booker);
+        booking.setStatus(Status.WAITING);
     }
 
     @Test
-    void createBookingReturnBookingDto() {
+    void createBooking_shouldReturnBookingDto_whenDataIsValid() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
+        when(bookingRepository.findOverlappingBookings(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(Collections.emptyList());
         when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
 
-        BookingDto result = bookingService.create(1L, bookingCreateDto);
+        var result = bookingService.create(booker.getId(), bookingCreateDto);
 
         assertNotNull(result);
         assertEquals(booking.getId(), result.getId());
+        assertEquals(booking.getStatus(), result.getStatus());
         verify(bookingRepository, times(1)).save(any(Booking.class));
     }
 
     @Test
-    void createBookingWhenUserNotFound() {
+    void createBooking_shouldThrowNotFoundException_whenUserIsNotFound() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            bookingService.create(1L, bookingCreateDto);
-        });
+        NotFoundException exception = assertThrows(NotFoundException.class, () ->
+                bookingService.create(999L, bookingCreateDto));
 
         assertEquals("Пользователь не найден", exception.getMessage());
-        verify(bookingRepository, never()).save(any(Booking.class));
     }
 
     @Test
-    void updateBookingReturnUpdatedBookingDto() {
+    void createBooking_shouldThrowNotFoundException_whenItemIsNotFound() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () ->
+                bookingService.create(booker.getId(), bookingCreateDto));
+
+        assertEquals("Вещь не найдена.", exception.getMessage());
+    }
+
+    @Test
+    void createBooking_shouldThrowIllegalStateException_whenTimeIsUnavailable() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
+        when(bookingRepository.findOverlappingBookings(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(List.of(booking));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+                bookingService.create(booker.getId(), bookingCreateDto));
+
+        assertEquals("Данное время уже занято для бронирования.", exception.getMessage());
+    }
+
+    @Test
+    void createBooking_shouldThrowIllegalStateException_whenItemIsNotAvailable() {
+        item.setAvailable(false);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
+        when(bookingRepository.findOverlappingBookings(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(Collections.emptyList());
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+                bookingService.create(booker.getId(), bookingCreateDto));
+
+        assertEquals("Вещь не доступна для бронирования.", exception.getMessage());
+    }
+
+    @Test
+    void createBooking_shouldThrowIllegalArgumentException_whenStartIsNotBeforeEnd() {
+        bookingCreateDto.setEnd(LocalDateTime.now().plusDays(1));
+        bookingCreateDto.setStart(LocalDateTime.now().plusDays(2));
+
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                bookingService.create(booker.getId(), bookingCreateDto));
+
+        assertEquals("Время начала должно быть раньше времени окончания.", exception.getMessage());
+    }
+
+    @Test
+    void updateBooking_shouldReturnUpdatedBookingDto_whenApprovedIsTrue() {
         when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
         when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
-        BookingDto result = bookingService.update(1L, 1L, true);
+
+        var result = bookingService.update(owner.getId(), booking.getId(), true);
 
         assertNotNull(result);
         assertEquals(Status.APPROVED, result.getStatus());
@@ -89,84 +173,247 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void getBookingByIdReturnBookingDto() {
+    void updateBooking_shouldReturnUpdatedBookingDto_whenApprovedIsFalse() {
         when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
-        BookingDto result = bookingService.getBookingById(1L, 1L);
+        when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
+
+        var result = bookingService.update(owner.getId(), booking.getId(), false);
+
+        assertNotNull(result);
+        assertEquals(Status.REJECTED, result.getStatus());
+        verify(bookingRepository, times(1)).save(any(Booking.class));
+    }
+
+    @Test
+    void updateBooking_shouldThrowNotFoundException_whenBookingNotFound() {
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () ->
+                bookingService.update(owner.getId(), booking.getId(), true));
+
+        assertEquals("Бронирование " + booking.getId() + " не найдено.", exception.getMessage());
+    }
+
+    @Test
+    void updateBooking_shouldThrowValidationException_whenUserIsNotOwner() {
+        User anotherUser = new User();
+        anotherUser.setId(999L);
+
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
+
+        ValidationException exception = assertThrows(ValidationException.class, () ->
+                bookingService.update(anotherUser.getId(), booking.getId(), true));
+
+        assertEquals("Только владелец вещи может подтвердить или отклонить бронирование.", exception.getMessage());
+    }
+
+    @Test
+    void updateBooking_shouldThrowIllegalStateException_whenStatusIsNotWaiting() {
+        booking.setStatus(Status.APPROVED);
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+                bookingService.update(owner.getId(), booking.getId(), true));
+
+        assertEquals("Статус можно изменить только у бронирования со статусом WAITING.", exception.getMessage());
+    }
+
+    @Test
+    void getBookingById_shouldReturnBookingDto_whenUserIsBooker() {
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
+
+        var result = bookingService.getBookingById(booker.getId(), booking.getId());
 
         assertNotNull(result);
         assertEquals(booking.getId(), result.getId());
     }
 
     @Test
-    void findAllReturnListOfBookingDto() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
-        when(bookingRepository.findByBookerIdOrderByStartDesc(anyLong())).thenReturn(List.of(booking));
-        List<BookingDto> result = bookingService.findAll(1L, "ALL", 0, 10);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-    }
-
-    @Test
-    void getOwnerBookingsReturnListOfBookingDto() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
-        when(bookingRepository.findByItemOwnerIdOrderByStartDesc(anyLong())).thenReturn(List.of(booking));
-        List<BookingDto> result = bookingService.getOwnerBookings(1L, "ALL", 0, 10);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-    }
-
-    @Test
-    void updateBookingWhenBookingNotFound() {
-        when(bookingRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            bookingService.update(1L, 1L, true);
-        });
-
-        assertEquals("Бронирование 1 не найдено.", exception.getMessage());
-        verify(bookingRepository, never()).save(any(Booking.class));
-    }
-
-    @Test
-    void updateBookingWhenStatusIsAlreadyApproved() {
-        booking.setStatus(Status.APPROVED);
+    void getBookingById_shouldReturnBookingDto_whenUserIsOwner() {
         when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
 
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            bookingService.update(1L, 1L, true);
-        });
+        var result = bookingService.getBookingById(owner.getId(), booking.getId());
 
-        assertEquals("Статус можно изменить только у бронирования со статусом WAITING.", exception.getMessage());
-        verify(bookingRepository, never()).save(any(Booking.class));
+        assertNotNull(result);
+        assertEquals(booking.getId(), result.getId());
     }
 
     @Test
-    void createBookingWhenItemIsNotAvailable() {
-        item.setAvailable(false);
+    void getBookingById_shouldThrowNotFoundException_whenBookingNotFound() {
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () ->
+                bookingService.getBookingById(booker.getId(), booking.getId()));
+
+        assertEquals("Бронирование " + booking.getId() + " не найдено.", exception.getMessage());
+    }
+
+    @Test
+    void getBookingById_shouldThrowNotFoundException_whenUserIsNotBookerOrOwner() {
+        User anotherUser = new User();
+        anotherUser.setId(999L);
+
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () ->
+                bookingService.getBookingById(anotherUser.getId(), booking.getId()));
+
+        assertEquals("Просматривать бронирование может только владелец вещи или создатель брони.", exception.getMessage());
+    }
+
+    @Test
+    void findAll_shouldReturnListOfBookingDto_whenStateIsAll() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
-        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
+        when(bookingRepository.findByBookerIdOrderByStartDesc(anyLong())).thenReturn(List.of(booking));
 
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            bookingService.create(1L, bookingCreateDto);
-        });
+        var result = bookingService.findAll(booker.getId(), "ALL", 0, 10);
 
-        assertEquals("Вещь не доступна для бронирования.", exception.getMessage());
-        verify(bookingRepository, never()).save(any(Booking.class));
+        assertNotNull(result);
+        assertEquals(1, result.size());
     }
 
     @Test
-    void getBookingById_BookingNotFound_ThrowsNotFoundException() {
-        when(bookingRepository.findById(anyLong())).thenReturn(Optional.empty());
+    void findAll_shouldReturnListOfBookingDto_whenStateIsCurrent() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
+        when(bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(List.of(booking));
 
-        assertThrows(NotFoundException.class, () -> bookingService.getBookingById(1L, 1L));
+        var result = bookingService.findAll(booker.getId(), "CURRENT", 0, 10);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
     }
 
     @Test
-    void updateBooking_BookingNotFound_ThrowsNotFoundException() {
-        when(bookingRepository.findById(anyLong())).thenReturn(Optional.empty());
+    void findAll_shouldReturnListOfBookingDto_whenStateIsPast() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
+        when(bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(anyLong(), any(LocalDateTime.class))).thenReturn(List.of(booking));
 
-        assertThrows(NotFoundException.class, () -> bookingService.update(1L, 1L, true));
+        var result = bookingService.findAll(booker.getId(), "PAST", 0, 10);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void findAll_shouldReturnListOfBookingDto_whenStateIsFuture() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
+        when(bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(anyLong(), any(LocalDateTime.class))).thenReturn(List.of(booking));
+
+        var result = bookingService.findAll(booker.getId(), "FUTURE", 0, 10);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void findAll_shouldReturnListOfBookingDto_whenStateIsWaiting() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
+        when(bookingRepository.findByBookerIdAndStatusAndStartAfterOrderByStartDesc(anyLong(), any(Status.class), any(LocalDateTime.class)))
+                .thenReturn(List.of(booking));
+
+        var result = bookingService.findAll(booker.getId(), "WAITING", 0, 10);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void findAll_shouldReturnListOfBookingDto_whenStateIsRejected() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
+        when(bookingRepository.findByBookerIdAndStatusOrderByStartDesc(anyLong(), any(Status.class))).thenReturn(List.of(booking));
+
+        var result = bookingService.findAll(booker.getId(), "REJECTED", 0, 10);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void findAll_shouldThrowNotFoundException_whenUserNotFound() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () ->
+                bookingService.findAll(999L, "ALL", 0, 10));
+
+        assertEquals("Пользователь не найден", exception.getMessage());
+    }
+
+    @Test
+    void getOwnerBookings_shouldReturnListOfBookingDto_whenStateIsAll() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
+        when(bookingRepository.findByItemOwnerIdOrderByStartDesc(anyLong())).thenReturn(List.of(booking));
+
+        var result = bookingService.getOwnerBookings(owner.getId(), "ALL", 0, 10);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getOwnerBookings_shouldReturnListOfBookingDto_whenStateIsCurrent() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
+        when(bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(List.of(booking));
+
+        var result = bookingService.getOwnerBookings(owner.getId(), "CURRENT", 0, 10);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getOwnerBookings_shouldReturnListOfBookingDto_whenStateIsPast() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
+        when(bookingRepository.findByItemOwnerIdAndEndBeforeOrderByStartDesc(anyLong(), any(LocalDateTime.class))).thenReturn(List.of(booking));
+
+        var result = bookingService.getOwnerBookings(owner.getId(), "PAST", 0, 10);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getOwnerBookings_shouldReturnListOfBookingDto_whenStateIsFuture() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
+        when(bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(anyLong(), any(LocalDateTime.class))).thenReturn(List.of(booking));
+
+        var result = bookingService.getOwnerBookings(owner.getId(), "FUTURE", 0, 10);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getOwnerBookings_shouldReturnListOfBookingDto_whenStateIsWaiting() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
+        when(bookingRepository.findByItemOwnerIdAndStatusAndStartAfterOrderByStartDesc(anyLong(), any(Status.class), any(LocalDateTime.class)))
+                .thenReturn(List.of(booking));
+
+        var result = bookingService.getOwnerBookings(owner.getId(), "WAITING", 0, 10);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getOwnerBookings_shouldReturnListOfBookingDto_whenStateIsRejected() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
+        when(bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(anyLong(), any(Status.class))).thenReturn(List.of(booking));
+
+        var result = bookingService.getOwnerBookings(owner.getId(), "REJECTED", 0, 10);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getOwnerBookings_shouldThrowNotFoundException_whenUserNotFound() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () ->
+                bookingService.getOwnerBookings(999L, "ALL", 0, 10));
+
+        assertEquals("Пользователь не найден", exception.getMessage());
     }
 }
