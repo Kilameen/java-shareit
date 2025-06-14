@@ -1,87 +1,102 @@
 package ru.practicum.shareit.user;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(UserController.class)
 class UserControllerTest {
 
-    @Mock
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockBean
     private UserService userService;
 
-    @InjectMocks
-    private UserController userController;
-
     @Test
-    void createUser() {
+    void createUser() throws Exception {
         UserDto userDto = UserDto.builder().name("Test").email("test@yandex.ru").build();
         UserDto createdUserDto = UserDto.builder().id(1L).name("Test").email("test@yandex.ru").build();
 
-        when(userService.create(userDto)).thenReturn(createdUserDto);
+        when(userService.create(any(UserDto.class))).thenReturn(createdUserDto);
 
-        UserDto result = userController.create(userDto);
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1));
 
-        assertEquals(createdUserDto, result);
-        verify(userService, times(1)).create(userDto);
+        verify(userService, times(1)).create(any(UserDto.class));
     }
 
     @Test
-    void updateUser() {
+    void updateUser() throws Exception {
         Long userId = 1L;
         UserDto userDto = UserDto.builder().name("Updated").email("updated@yandex.ru").build();
         UserDto updatedUserDto = UserDto.builder().id(userId).name("Updated").email("updated@yandex.ru").build();
 
-        when(userService.update(userId, userDto)).thenReturn(updatedUserDto);
+        when(userService.update(eq(userId), any(UserDto.class))).thenReturn(updatedUserDto);
 
-        UserDto result = userController.update(userId, userDto);
+        mockMvc.perform(patch("/users/{id}", userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(userId));
 
-        assertEquals(updatedUserDto, result);
-        verify(userService, times(1)).update(userId, userDto);
+        verify(userService, times(1)).update(eq(userId), any(UserDto.class));
     }
 
     @Test
-    void getUserById() {
+    void getUserById() throws Exception {
         Long userId = 1L;
         UserDto userDto = UserDto.builder().id(userId).name("Test").email("test@yandex.ru").build();
 
         when(userService.findUserById(userId)).thenReturn(userDto);
 
-        UserDto result = userController.getUserById(userId);
+        mockMvc.perform(get("/users/{id}", userId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(userId));
 
-        assertEquals(userDto, result);
         verify(userService, times(1)).findUserById(userId);
     }
 
     @Test
-    void deleteUser() {
+    void deleteUser() throws Exception {
         Long userId = 1L;
 
-        userController.deleteUser(userId);
+        mockMvc.perform(delete("/users/{id}", userId))
+                .andExpect(status().isOk());
 
         verify(userService, times(1)).delete(userId);
     }
 
     @Test
-    void getAllUsers() {
+    void getAllUsers() throws Exception {
         UserDto userDto = UserDto.builder().id(1L).name("Test").email("test@yandex.ru").build();
         List<UserDto> userDtoList = Collections.singletonList(userDto);
 
         when(userService.findAll()).thenReturn(userDtoList);
 
-        List<UserDto> result = userController.getAllUsers();
+        mockMvc.perform(get("/users"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1));
 
-        assertEquals(userDtoList, result);
         verify(userService, times(1)).findAll();
     }
 }

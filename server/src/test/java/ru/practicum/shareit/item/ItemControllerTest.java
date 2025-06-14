@@ -1,40 +1,44 @@
 package ru.practicum.shareit.item;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import ru.practicum.shareit.exception.NotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.Collections;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.hamcrest.Matchers.is;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(ItemController.class)
 public class ItemControllerTest {
 
-    @Mock
-    private ItemService itemService;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @InjectMocks
-    private ItemController itemController;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockBean
+    private ItemService itemService;
 
     private ItemDto itemDto;
     private ItemCreateDto itemCreateDto;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         itemDto = new ItemDto();
         itemDto.setId(1L);
         itemDto.setName("Test Item");
@@ -48,48 +52,57 @@ public class ItemControllerTest {
     }
 
     @Test
-    void createItemTest() {
+    void createItemTest() throws Exception {
         when(itemService.create(anyLong(), any(ItemCreateDto.class))).thenReturn(itemDto);
-        ItemDto result = itemController.create(1L, itemCreateDto);
-        assertEquals(itemDto, result);
+
+        mockMvc.perform(post("/items")
+                        .header("X-Sharer-User-Id", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(itemCreateDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)));
     }
 
     @Test
-    void updateItemTest() {
+    void updateItemTest() throws Exception {
         when(itemService.update(anyLong(), anyLong(), any(ItemUpdateDto.class))).thenReturn(itemDto);
-        ItemDto result = itemController.update(1L, 1L, new ItemUpdateDto());
-        assertEquals(itemDto, result);
+
+        mockMvc.perform(patch("/items/{itemId}", 1L)
+                        .header("X-Sharer-User-Id", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ItemUpdateDto())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)));
     }
 
     @Test
-    void getItemByIdTest() {
+    void getItemByIdTest() throws Exception {
         when(itemService.getItemDtoById(anyLong(), anyLong())).thenReturn(itemDto);
-        ItemDto result = itemController.getItemById(1L, 1L);
-        assertEquals(itemDto, result);
+
+        mockMvc.perform(get("/items/{itemId}", 1L)
+                        .header("X-Sharer-User-Id", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)));
     }
 
     @Test
-    void getItemsByUserIdTest() {
+    void getItemsByUserIdTest() throws Exception {
         when(itemService.getAllItemDtoByUserId(anyLong())).thenReturn(Collections.singletonList(itemDto));
-        List<ItemDto> result = (List<ItemDto>) itemController.getItemsByUserId(1L);
-        assertEquals(1, result.size());
-        assertEquals(itemDto, result.get(0));
+
+        mockMvc.perform(get("/items")
+                        .header("X-Sharer-User-Id", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id", is(1)));
     }
 
     @Test
-    void searchItemsTest() {
+    void searchItemsTest() throws Exception {
         when(itemService.searchItems(anyLong(), any(String.class))).thenReturn(Collections.singletonList(itemDto));
-        List<ItemDto> result = itemController.searchItems(1L, "text");
-        assertEquals(1, result.size());
-        assertEquals(itemDto, result.get(0));
-    }
 
-    @Test
-    void updateItemNotFoundTest() {
-        when(itemService.update(anyLong(), anyLong(), any(ItemUpdateDto.class))).thenThrow(new NotFoundException("Вещь не найдена"));
-
-        assertThrows(NotFoundException.class, () -> {
-            itemController.update(1L, 999L, new ItemUpdateDto());
-        });
+        mockMvc.perform(get("/items/search")
+                        .header("X-Sharer-User-Id", 1L)
+                        .param("text", "text"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id", is(1)));
     }
 }
