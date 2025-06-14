@@ -19,7 +19,7 @@ public class CommentDtoTest {
     @Autowired
     private JacksonTester<CommentDto> json;
 
-    private final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     @Test
     void testCommentDto() throws IOException {
