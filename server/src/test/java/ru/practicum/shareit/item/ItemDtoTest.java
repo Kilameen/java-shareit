@@ -87,4 +87,38 @@ public class ItemDtoTest {
         assertThat(jsonContent).extractingJsonPathStringValue("$.description")
                 .isEqualTo("Test Description");
     }
+
+    @Test
+    void testItemDtoDeserialization() throws IOException {
+        String json = "{\"id\":1,\"name\":\"Test Item\",\"description\":\"Test Description\",\"available\":true,\"owner\":{\"id\":null,\"name\":null,\"email\":null},\"comments\":[],\"requestId\":2}";
+        ItemDto itemDto = itemDtoJsonTester.parseObject(json);
+
+        assertThat(itemDto.getId()).isEqualTo(1L);
+        assertThat(itemDto.getName()).isEqualTo("Test Item");
+        assertThat(itemDto.getDescription()).isEqualTo("Test Description");
+        assertThat(itemDto.getAvailable()).isEqualTo(true);
+        assertThat(itemDto.getRequestId()).isEqualTo(2L);
+    }
+
+    @Test
+    void testItemCreateDtoDeserialization() throws IOException {
+        String json = "{\"name\":\"Test Item\",\"description\":\"Test Description\",\"available\":true,\"requestId\":2}";
+        ItemCreateDto itemCreateDto = itemCreateDtoJsonTester.parseObject(json);
+
+        assertThat(itemCreateDto.getName()).isEqualTo("Test Item");
+        assertThat(itemCreateDto.getDescription()).isEqualTo("Test Description");
+        assertThat(itemCreateDto.getAvailable()).isEqualTo(true);
+        assertThat(itemCreateDto.getRequestId()).isEqualTo(2L);
+    }
+
+    @Test
+    void testItemUpdateDtoDeserialization() throws IOException {
+        String json = "{\"name\":\"Test Item\",\"description\":\"Test Description\",\"available\":true,\"requestId\":2}";
+        ItemUpdateDto itemUpdateDto = itemUpdateDtoJsonTester.parseObject(json);
+
+        assertThat(itemUpdateDto.getName()).isEqualTo("Test Item");
+        assertThat(itemUpdateDto.getDescription()).isEqualTo("Test Description");
+        assertThat(itemUpdateDto.getAvailable()).isEqualTo(true);
+        assertThat(itemUpdateDto.getRequestId()).isEqualTo(2L);
+    }
 }

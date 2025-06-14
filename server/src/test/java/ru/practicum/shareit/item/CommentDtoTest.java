@@ -22,7 +22,7 @@ public class CommentDtoTest {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     @Test
-    void testCommentDto() throws IOException {
+    void testCommentDtoSerialization() throws IOException {
         LocalDateTime now = LocalDateTime.now();
         CommentDto commentDto = CommentDto.builder()
                 .id(1L)
