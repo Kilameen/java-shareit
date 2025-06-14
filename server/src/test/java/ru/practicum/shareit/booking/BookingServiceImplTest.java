@@ -108,12 +108,65 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void getOwnerBookings_shouldReturnListOfBookingDto() {
+    void getOwnerBookingsReturnListOfBookingDto() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
         when(bookingRepository.findByItemOwnerIdOrderByStartDesc(anyLong())).thenReturn(List.of(booking));
         List<BookingDto> result = bookingService.getOwnerBookings(1L, "ALL", 0, 10);
 
         assertNotNull(result);
         assertEquals(1, result.size());
+    }
+
+    @Test
+    void updateBookingWhenBookingNotFound() {
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
+            bookingService.update(1L, 1L, true);
+        });
+
+        assertEquals("Бронирование 1 не найдено.", exception.getMessage());
+        verify(bookingRepository, never()).save(any(Booking.class));
+    }
+
+    @Test
+    void updateBookingWhenStatusIsAlreadyApproved() {
+        booking.setStatus(Status.APPROVED);
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            bookingService.update(1L, 1L, true);
+        });
+
+        assertEquals("Статус можно изменить только у бронирования со статусом WAITING.", exception.getMessage());
+        verify(bookingRepository, never()).save(any(Booking.class));
+    }
+
+    @Test
+    void createBookingWhenItemIsNotAvailable() {
+        item.setAvailable(false);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            bookingService.create(1L, bookingCreateDto);
+        });
+
+        assertEquals("Вещь не доступна для бронирования.", exception.getMessage());
+        verify(bookingRepository, never()).save(any(Booking.class));
+    }
+
+    @Test
+    void getBookingById_BookingNotFound_ThrowsNotFoundException() {
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> bookingService.getBookingById(1L, 1L));
+    }
+
+    @Test
+    void updateBooking_BookingNotFound_ThrowsNotFoundException() {
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> bookingService.update(1L, 1L, true));
     }
 }

@@ -146,7 +146,7 @@ public class BookingServiceImpl implements BookingService {
 
     private void bookingValidation(BookingCreateDto bookingCreateDto, Item item) {
         if (!item.getAvailable()) {
-            throw new IllegalStateException("Вещь недоступна для бронирования.");
+            throw new IllegalStateException("Вещь не доступна для бронирования.");
         }
 
         if (!bookingCreateDto.getStart().isBefore(bookingCreateDto.getEnd())) {

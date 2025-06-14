@@ -12,11 +12,13 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exception.NotFoundException;
 
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -92,5 +94,13 @@ class BookingControllerTest {
 
         assertEquals(1, result.size());
         assertEquals(bookingDto, result.get(0));
+    }
+
+    @Test
+    void createBookingWhenServiceThrowsNotFoundException() {
+        when(bookingService.create(anyLong(), any(BookingCreateDto.class)))
+                .thenThrow(new NotFoundException("Item not found"));
+
+        assertThrows(NotFoundException.class, () -> bookingController.create(1L, bookingCreateDto));
     }
 }

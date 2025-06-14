@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemUpdateDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
 import ru.practicum.shareit.user.UserRepository;
@@ -17,7 +18,7 @@ import ru.practicum.shareit.user.model.User;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,5 +65,32 @@ class ItemServiceImplTest {
         });
 
         assertEquals("Пользователь с ID 1 не найден.", exception.getMessage());
+    }
+
+    @Test
+    void getItemDtoByIdItemNotFound() {
+        when(itemRepository.findById(1L)).thenReturn(Optional.empty());
+        when(userRepository.findById(1L)).thenReturn(Optional.of(User.builder().id(1L).build()));
+
+        assertThrows(NotFoundException.class, () -> itemService.getItemDtoById(1L, 1L));
+    }
+
+    @Test
+    void getItemByIdNotFoundTest() {
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(User.builder().id(1L).build()));
+
+        assertThrows(NotFoundException.class, () -> {
+            itemService.getItemDtoById(1L, 1L);
+        });
+    }
+
+    @Test
+    void updateItemWhenItemNotFound() {
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.empty());
+        ItemUpdateDto itemUpdateDto = ItemUpdateDto.builder().build();
+
+        assertThrows(NotFoundException.class, () -> itemService.update(1L, 1L, itemUpdateDto));
     }
 }

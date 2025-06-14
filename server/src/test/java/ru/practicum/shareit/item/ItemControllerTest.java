@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
@@ -14,6 +15,7 @@ import ru.practicum.shareit.item.service.ItemService;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -80,5 +82,14 @@ public class ItemControllerTest {
         List<ItemDto> result = itemController.searchItems(1L, "text");
         assertEquals(1, result.size());
         assertEquals(itemDto, result.get(0));
+    }
+
+    @Test
+    void updateItemNotFoundTest() {
+        when(itemService.update(anyLong(), anyLong(), any(ItemUpdateDto.class))).thenThrow(new NotFoundException("Вещь не найдена"));
+
+        assertThrows(NotFoundException.class, () -> {
+            itemController.update(1L, 999L, new ItemUpdateDto());
+        });
     }
 }
