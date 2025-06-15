@@ -1,9 +1,11 @@
 package ru.practicum.shareit.booking;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.json.JsonTest;
+import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.boot.test.json.JsonContent;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.Status;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -11,37 +13,44 @@ import ru.practicum.shareit.user.dto.UserDto;
 
 import java.time.LocalDateTime;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+@JsonTest
 public class BookingDtoTest {
+
+    @Autowired
+    private JacksonTester<BookingDto> json;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @BeforeEach
-    void setUp() {
-        objectMapper.registerModule(new JavaTimeModule());
-    }
-
     @Test
-    public void testSerializeBookingDto() throws Exception {
+    void testSerializeBookingDto() throws Exception {
+        LocalDateTime start = LocalDateTime.now().plusDays(1);
+        LocalDateTime end = LocalDateTime.now().plusDays(2);
+
         BookingDto bookingDto = BookingDto.builder()
                 .id(1L)
-                .start(LocalDateTime.now().plusDays(1))
-                .end(LocalDateTime.now().plusDays(2))
+                .start(start)
+                .end(end)
                 .item(new ItemDto())
                 .booker(new UserDto())
                 .status(Status.WAITING)
                 .build();
 
-        String json = objectMapper.writeValueAsString(bookingDto);
-        assertNotNull(json);
+        JsonContent<BookingDto> result = json.write(bookingDto);
+
+        assertThat(result).extractingJsonPathNumberValue("$.id").isEqualTo(1);
+        assertThat(result).extractingJsonPathStringValue("$.start").isNotBlank();
+        assertThat(result).extractingJsonPathStringValue("$.end").isNotBlank();
+        assertThat(result).extractingJsonPathStringValue("$.status").isEqualTo("WAITING");
     }
 
     @Test
-    public void testDeserializeBookingDto() throws Exception {
-        String json = "{\"id\":1,\"start\":\"2024-01-01T10:00:00\",\"end\":\"2024-01-02T10:00:00\",\"item\":{},\"booker\":{},\"status\":\"WAITING\"}";
+    void testDeserializeBookingDto() throws Exception {
+        String content = "{\"id\":1,\"start\":\"2024-01-01T10:00:00\",\"end\":\"2024-01-02T10:00:00\",\"item\":{},\"booker\":{},\"status\":\"WAITING\"}";
 
-        BookingDto bookingDto = objectMapper.readValue(json, BookingDto.class);
+        BookingDto bookingDto = json.parse(content).getObject();
 
         assertNotNull(bookingDto);
         assertEquals(1L, bookingDto.getId());
@@ -49,9 +58,9 @@ public class BookingDtoTest {
     }
 
     @Test
-    public void testDeserializeBookingDtoWithNullValues() throws Exception {
-        String json = "{\"id\":null,\"start\":null,\"end\":null,\"item\":null,\"booker\":null,\"status\":null}";
-        BookingDto bookingDto = objectMapper.readValue(json, BookingDto.class);
+    void testDeserializeBookingDtoWithNullValues() throws Exception {
+        String content = "{\"id\":null,\"start\":null,\"end\":null,\"item\":null,\"booker\":null,\"status\":null}";
+        BookingDto bookingDto = json.parse(content).getObject();
 
         assertNotNull(bookingDto, "Объект BookingDto не должен быть null");
         assertNull(bookingDto.getId(), "ID должен быть null");
@@ -130,8 +139,8 @@ public class BookingDtoTest {
                 .booker(UserDto.builder().build())
                 .build();
 
-        String json = objectMapper.writeValueAsString(bookingDto);
-        BookingDto deserializedDto = objectMapper.readValue(json, BookingDto.class);
+        String jsonString = json.write(bookingDto).getJson();
+        BookingDto deserializedDto = json.parse(jsonString).getObject();
 
         assertEquals(bookingDto, deserializedDto);
     }
@@ -150,8 +159,8 @@ public class BookingDtoTest {
                 .status(Status.APPROVED)
                 .build();
 
-        String json = objectMapper.writeValueAsString(bookingDto);
-        BookingDto deserializedDto = objectMapper.readValue(json, BookingDto.class);
+        String jsonString = json.write(bookingDto).getJson();
+        BookingDto deserializedDto = json.parse(jsonString).getObject();
 
         assertEquals(bookingDto, deserializedDto);
     }
@@ -168,8 +177,8 @@ public class BookingDtoTest {
                 .status(Status.REJECTED)
                 .build();
 
-        String json = objectMapper.writeValueAsString(bookingDto);
-        BookingDto deserializedDto = objectMapper.readValue(json, BookingDto.class);
+        String jsonString = json.write(bookingDto).getJson();
+        BookingDto deserializedDto = json.parse(jsonString).getObject();
 
         assertEquals(bookingDto, deserializedDto);
     }
