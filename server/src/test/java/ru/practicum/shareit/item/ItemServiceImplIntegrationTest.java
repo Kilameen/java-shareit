@@ -63,6 +63,7 @@ public class ItemServiceImplIntegrationTest {
         assertNotNull(itemDto);
         assertEquals(createdItemDto.getId(), itemDto.getId());
         assertEquals(createdItemDto.getName(), itemDto.getName());
+        assertEquals(itemCreateDto.getDescription(), itemDto.getDescription());
     }
 
     @Test

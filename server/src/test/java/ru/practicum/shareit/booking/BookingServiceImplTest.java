@@ -80,7 +80,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void createBooking_shouldReturnBookingDto_whenDataIsValid() {
+    void createBookingReturnBookingDtoWhenDataIsValid() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
         when(bookingRepository.findOverlappingBookings(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
@@ -96,7 +96,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void createBooking_shouldThrowNotFoundException_whenUserIsNotFound() {
+    void createBookingWhenUserIsNotFound() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
@@ -106,7 +106,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void createBooking_shouldThrowNotFoundException_whenItemIsNotFound() {
+    void createBookingWhenItemIsNotFound() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
         when(itemRepository.findById(anyLong())).thenReturn(Optional.empty());
 
@@ -117,7 +117,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void createBooking_shouldThrowIllegalStateException_whenTimeIsUnavailable() {
+    void createBookingWhenTimeIsUnavailable() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
         when(bookingRepository.findOverlappingBookings(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
@@ -130,7 +130,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void createBooking_shouldThrowIllegalStateException_whenItemIsNotAvailable() {
+    void createBookingWhenItemIsNotAvailable() {
         item.setAvailable(false);
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
@@ -144,7 +144,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void createBooking_shouldThrowIllegalArgumentException_whenStartIsNotBeforeEnd() {
+    void createBookingWhenStartIsNotBeforeEnd() {
         bookingCreateDto.setEnd(LocalDateTime.now().plusDays(1));
         bookingCreateDto.setStart(LocalDateTime.now().plusDays(2));
 
@@ -158,7 +158,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void updateBooking_shouldReturnUpdatedBookingDto_whenApprovedIsTrue() {
+    void updateBookingReturnUpdatedBookingDtoWhenApprovedIsTrue() {
         when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
         when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
 
@@ -170,7 +170,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void updateBooking_shouldReturnUpdatedBookingDto_whenApprovedIsFalse() {
+    void updateBookingReturnUpdatedBookingDtoWhenApprovedIsFalse() {
         when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
         when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
 
@@ -182,7 +182,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void updateBooking_shouldThrowNotFoundException_whenBookingNotFound() {
+    void updateBookingWhenBookingNotFound() {
         when(bookingRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
@@ -192,7 +192,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void updateBooking_shouldThrowValidationException_whenUserIsNotOwner() {
+    void updateBookingWhenUserIsNotOwner() {
         User anotherUser = new User();
         anotherUser.setId(999L);
 
@@ -205,7 +205,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void updateBooking_shouldThrowIllegalStateException_whenStatusIsNotWaiting() {
+    void updateBookingWhenStatusIsNotWaiting() {
         booking.setStatus(Status.APPROVED);
         when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
 
@@ -216,7 +216,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void getBookingById_shouldReturnBookingDto_whenUserIsBooker() {
+    void getBookingById_WhenUserIsBooker() {
         when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
 
         var result = bookingService.getBookingById(booker.getId(), booking.getId());
@@ -226,7 +226,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void getBookingById_shouldReturnBookingDto_whenUserIsOwner() {
+    void getBookingByIdWhenUserIsOwner() {
         when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
 
         var result = bookingService.getBookingById(owner.getId(), booking.getId());
@@ -236,7 +236,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void getBookingById_shouldThrowNotFoundException_whenBookingNotFound() {
+    void getBookingByIdWhenBookingNotFound() {
         when(bookingRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
@@ -246,7 +246,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void getBookingById_shouldThrowNotFoundException_whenUserIsNotBookerOrOwner() {
+    void getBookingByIdWhenUserIsNotBookerOrOwner() {
         User anotherUser = new User();
         anotherUser.setId(999L);
 
@@ -259,7 +259,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void findAll_shouldReturnListOfBookingDto_whenStateIsAll() {
+    void findAllReturnListOfBookingDtoWhenStateIsAll() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
         when(bookingRepository.findByBookerIdOrderByStartDesc(anyLong())).thenReturn(List.of(booking));
 
@@ -270,7 +270,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void findAll_shouldReturnListOfBookingDto_whenStateIsCurrent() {
+    void findAllReturnListOfBookingDtoWhenStateIsCurrent() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
         when(bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(List.of(booking));
@@ -282,7 +282,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void findAll_shouldReturnListOfBookingDto_whenStateIsPast() {
+    void findAllReturnListOfBookingDtoWhenStateIsPast() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
         when(bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(anyLong(), any(LocalDateTime.class))).thenReturn(List.of(booking));
 
@@ -293,7 +293,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void findAll_shouldReturnListOfBookingDto_whenStateIsFuture() {
+    void findAllReturnListOfBookingDtoWhenStateIsFuture() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
         when(bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(anyLong(), any(LocalDateTime.class))).thenReturn(List.of(booking));
 
@@ -304,7 +304,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void findAll_shouldReturnListOfBookingDto_whenStateIsWaiting() {
+    void findAllReturnListOfBookingDtoWhenStateIsWaiting() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
         when(bookingRepository.findByBookerIdAndStatusAndStartAfterOrderByStartDesc(anyLong(), any(Status.class), any(LocalDateTime.class)))
                 .thenReturn(List.of(booking));
@@ -316,7 +316,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void findAll_shouldReturnListOfBookingDto_whenStateIsRejected() {
+    void findAllReturnListOfBookingDtoWhenStateIsRejected() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(booker));
         when(bookingRepository.findByBookerIdAndStatusOrderByStartDesc(anyLong(), any(Status.class))).thenReturn(List.of(booking));
 
@@ -327,7 +327,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void findAll_shouldThrowNotFoundException_whenUserNotFound() {
+    void findAllWhenUserNotFound() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
@@ -337,7 +337,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void getOwnerBookings_shouldReturnListOfBookingDto_whenStateIsAll() {
+    void getOwnerBookingsReturnListOfBookingDtoWhenStateIsAll() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
         when(bookingRepository.findByItemOwnerIdOrderByStartDesc(anyLong())).thenReturn(List.of(booking));
 
@@ -348,7 +348,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void getOwnerBookings_shouldReturnListOfBookingDto_whenStateIsCurrent() {
+    void getOwnerBookingsReturnListOfBookingDtoWhenStateIsCurrent() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
         when(bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(List.of(booking));
@@ -360,7 +360,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void getOwnerBookings_shouldReturnListOfBookingDto_whenStateIsPast() {
+    void getOwnerBookingsReturnListOfBookingDtoWhenStateIsPast() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
         when(bookingRepository.findByItemOwnerIdAndEndBeforeOrderByStartDesc(anyLong(), any(LocalDateTime.class))).thenReturn(List.of(booking));
 
@@ -371,7 +371,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void getOwnerBookings_shouldReturnListOfBookingDto_whenStateIsFuture() {
+    void getOwnerBookingsReturnListOfBookingDtoWhenStateIsFuture() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
         when(bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(anyLong(), any(LocalDateTime.class))).thenReturn(List.of(booking));
 
@@ -382,7 +382,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void getOwnerBookings_shouldReturnListOfBookingDto_whenStateIsWaiting() {
+    void getOwnerBookingsReturnListOfBookingDtoWhenStateIsWaiting() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
         when(bookingRepository.findByItemOwnerIdAndStatusAndStartAfterOrderByStartDesc(anyLong(), any(Status.class), any(LocalDateTime.class)))
                 .thenReturn(List.of(booking));
@@ -394,7 +394,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void getOwnerBookings_shouldReturnListOfBookingDto_whenStateIsRejected() {
+    void getOwnerBookingsReturnListOfBookingDtoWhenStateIsRejected() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
         when(bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(anyLong(), any(Status.class))).thenReturn(List.of(booking));
 
@@ -405,7 +405,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void getOwnerBookings_shouldThrowNotFoundException_whenUserNotFound() {
+    void getOwnerBookingsWhenUserNotFound() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
