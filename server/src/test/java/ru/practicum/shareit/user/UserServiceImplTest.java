@@ -6,11 +6,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.practicum.shareit.exception.DuplicatedDataException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -122,5 +124,60 @@ public class UserServiceImplTest {
 
         assertEquals(actualUsersDto.size(), 1);
         assertEquals(actualUsersDto, expectedUserDto);
+    }
+
+    @Test
+    void updateUserWithDuplicateEmail() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.existsByEmail("duplicate@yandex.ru")).thenReturn(true);
+        UserDto userUpdateDto = UserDto.builder().email("duplicate@yandex.ru").build();
+
+        assertThrows(DuplicatedDataException.class, () -> userService.update(1L, userUpdateDto));
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void updateUserWithSameEmail() {
+        User user = User.builder().id(1L).name("Test User").email("test2@yandex.ru").build();
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        UserDto userUpdateDto = UserDto.builder().email("test@yandex.ru").build();
+        User updatedUser = User.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(userUpdateDto.getEmail())
+                .build();
+        when(userRepository.save(any(User.class))).thenReturn(updatedUser);
+
+        UserDto updatedUserDto = userService.update(1L, userUpdateDto);
+
+        assertEquals("test@yandex.ru", updatedUserDto.getEmail());
+        verify(userRepository, times(1)).save(any(User.class));
+    }
+
+    @Test
+    void updateUserWhenEmailIsTheSameThenUpdateSuccessfully() {
+        // Arrange
+        Long userId = 1L;
+        String existingEmail = "test@yandex.ru";
+        UserDto userUpdateDto = UserDto.builder().email(existingEmail).build();
+        User existingUser = User.builder().id(userId).name("Old Name").email(existingEmail).build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(userRepository.save(any(User.class))).thenReturn(existingUser);
+        UserDto updatedUserDto = userService.update(userId, userUpdateDto);
+
+        assertEquals(existingEmail, updatedUserDto.getEmail());
+        verify(userRepository, times(1)).save(any(User.class));
+    }
+
+    @Test
+    void findAllUsersReturnEmptyList() {
+        when(userRepository.findAll()).thenReturn(Collections.emptyList());
+
+        List<UserDto> actualUsersDto = userService.findAll();
+
+        assertTrue(actualUsersDto.isEmpty());
+        verify(userRepository, times(1)).findAll();
     }
 }
