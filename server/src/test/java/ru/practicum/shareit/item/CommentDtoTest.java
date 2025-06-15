@@ -144,7 +144,7 @@ public class CommentDtoTest {
         String jsonString = "{\"id\":1,\"itemId\":10,\"text\":\"Test comment\",\"authorName\":\"Test\",\"created\":\"invalid-date\"}";
         try {
             CommentDto commentDto = json.parse(jsonString).getObject();
-        } catch (Exception e) {
+        } catch (Exception ignored) {
 
         }
     }
@@ -185,6 +185,5 @@ public class CommentDtoTest {
                 .build();
         JsonContent<CommentDto> result = json.write(commentDto);
         assertThat(result).extractingJsonPathStringValue("$.authorName").isNull();
-
     }
 }
