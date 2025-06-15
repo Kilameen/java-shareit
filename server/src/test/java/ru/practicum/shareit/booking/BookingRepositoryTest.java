@@ -82,6 +82,7 @@ public class BookingRepositoryTest {
         List<Booking> bookings = bookingRepository.findAllByItemAndStatusOrderByStartAsc(item, Status.APPROVED);
         assertTrue(bookings.isEmpty());
     }
+
     @Test
     void findByBookerIdOrderByStartDesc() {
         List<Booking> bookings = bookingRepository.findByBookerIdOrderByStartDesc(booker.getId());
