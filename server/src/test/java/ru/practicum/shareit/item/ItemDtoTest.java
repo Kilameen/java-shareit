@@ -9,8 +9,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 import java.io.IOException;
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ItemDtoTest {
 
@@ -18,7 +17,6 @@ class ItemDtoTest {
 
     @Test
     void testItemDtoSerialization() throws IOException {
-        // Создаём экземпляр ItemDto для сериализации
         ItemDto itemDto = ItemDto.builder()
                 .id(1L)
                 .name("Test Item")
@@ -46,5 +44,64 @@ class ItemDtoTest {
         assertEquals(1L, itemDto.getId());
         assertEquals("Test Item", itemDto.getName());
         assertEquals("Test Description", itemDto.getDescription());
+    }
+
+    @Test
+    void testItemDtoWithNullValues() throws IOException {
+        String json = "{\"id\":null,\"name\":null,\"description\":null,\"available\":null,\"owner\":null,\"lastBooking\":null,\"comments\":null,\"nextBooking\":null,\"requestId\":null}";
+
+        ItemDto itemDto = objectMapper.readValue(json, ItemDto.class);
+
+        assertNull(itemDto.getId());
+        assertNull(itemDto.getName());
+        assertNull(itemDto.getDescription());
+        assertNull(itemDto.getAvailable());
+        assertNull(itemDto.getOwner());
+        assertNull(itemDto.getLastBooking());
+        assertNull(itemDto.getComments());
+        assertNull(itemDto.getNextBooking());
+        assertNull(itemDto.getRequestId());
+    }
+
+    @Test
+    void testItemDtoEmptyValues() throws IOException {
+        ItemDto itemDto = ItemDto.builder().build();
+        assertNull(itemDto.getId());
+        assertNull(itemDto.getName());
+        assertNull(itemDto.getDescription());
+        assertNull(itemDto.getAvailable());
+        assertNull(itemDto.getOwner());
+        assertNull(itemDto.getLastBooking());
+        assertNull(itemDto.getComments());
+        assertNull(itemDto.getNextBooking());
+        assertNull(itemDto.getRequestId());
+    }
+
+    @Test
+    void testItemDtoBlankName() {
+        ItemDto itemDto = ItemDto.builder().name("").description("desc").available(true).build();
+        assertEquals("", itemDto.getName());
+    }
+
+    @Test
+    void testItemDtoBlankDescription() {
+        ItemDto itemDto = ItemDto.builder().name("name").description("").available(true).build();
+        assertEquals("", itemDto.getDescription());
+    }
+
+    @Test
+    void testItemDtoWithNullFields() throws IOException {
+        ItemDto itemDto = ItemDto.builder().build();
+        String json = objectMapper.writeValueAsString(itemDto);
+        ItemDto deserializedItemDto = objectMapper.readValue(json, ItemDto.class);
+        assertEquals(itemDto, deserializedItemDto);
+    }
+
+    @Test
+    void testItemDtoEmptyLists() throws IOException {
+        ItemDto itemDto = ItemDto.builder().comments(Collections.emptyList()).build();
+        String json = objectMapper.writeValueAsString(itemDto);
+        ItemDto deserializedItemDto = objectMapper.readValue(json, ItemDto.class);
+        assertEquals(itemDto.getComments(), deserializedItemDto.getComments());
     }
 }

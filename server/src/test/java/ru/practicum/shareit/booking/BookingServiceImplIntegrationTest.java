@@ -43,7 +43,6 @@ public class BookingServiceImplIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        // Create a user and an item before each test
         booker = new User();
         booker.setName("Test User");
         booker.setEmail("test@yandex.ru");
