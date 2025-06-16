@@ -163,7 +163,7 @@ public class ItemControllerTest {
     }
 
     @Test
-    void searchItemsTest_EmptyText_ReturnsOkAndEmptyList() throws Exception {
+    void searchItemsTestEmptyTextReturnsOkAndEmptyList() throws Exception {
         when(itemService.searchItems(anyLong(), any(String.class))).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/items/search")
@@ -176,7 +176,7 @@ public class ItemControllerTest {
     }
 
     @Test
-    void searchItemsTest_BlankText_ReturnsOkAndEmptyList() throws Exception {
+    void searchItemsTestBlankTextReturnsOkAndEmptyList() throws Exception {
         when(itemService.searchItems(anyLong(), any(String.class))).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/items/search")
