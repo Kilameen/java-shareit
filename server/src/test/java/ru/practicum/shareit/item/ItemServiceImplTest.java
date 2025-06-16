@@ -105,7 +105,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void updateItem_success() {
+    void updateItemSuccess() {
         ItemUpdateDto itemUpdateDto = new ItemUpdateDto();
         itemUpdateDto.setName("Updated");
         itemUpdateDto.setDescription("Updated Description");
@@ -122,7 +122,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void updateItem_noUpdates() {
+    void updateItemNoUpdates() {
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
         ItemDto updatedItemDto = itemService.update(1L, 1L, itemUpdateDto);
         assertEquals(item.getName(), updatedItemDto.getName());
@@ -131,7 +131,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void updateItem_emptyName() {
+    void updateItemEmptyName() {
         itemUpdateDto.setName("");
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
 
@@ -141,7 +141,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void updateItem_emptyUpdateDto_noChanges() {
+    void updateItemEmptyUpdateDtoNoChanges() {
         ItemUpdateDto emptyUpdateDto = ItemUpdateDto.builder().build();
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
         when(itemRepository.save(any(Item.class))).thenReturn(item);
@@ -154,7 +154,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void updateItem_onlyNameUpdated() {
+    void updateItemOnlyNameUpdated() {
         itemUpdateDto = ItemUpdateDto.builder().name("New Name").build();
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
         when(itemRepository.save(any(Item.class))).thenReturn(item);
@@ -167,7 +167,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void updateItem_onlyDescriptionUpdated() {
+    void updateItemOnlyDescriptionUpdated() {
         itemUpdateDto = ItemUpdateDto.builder().description("New Description").build();
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
         when(itemRepository.save(any(Item.class))).thenReturn(item);
@@ -180,7 +180,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void updateItem_onlyAvailableUpdated() {
+    void updateItemOnlyAvailableUpdated() {
         itemUpdateDto = ItemUpdateDto.builder().available(false).build();
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
         when(itemRepository.save(any(Item.class))).thenReturn(item);

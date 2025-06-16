@@ -157,7 +157,6 @@ public class UserServiceImplTest {
 
     @Test
     void updateUserWhenEmailIsTheSameThenUpdateSuccessfully() {
-        // Arrange
         Long userId = 1L;
         String existingEmail = "test@yandex.ru";
         UserDto userUpdateDto = UserDto.builder().email(existingEmail).build();
@@ -179,5 +178,39 @@ public class UserServiceImplTest {
 
         assertTrue(actualUsersDto.isEmpty());
         verify(userRepository, times(1)).findAll();
+    }
+
+
+    @Test
+    void deleteNonExistingUser() {
+        Long userId = 999L;
+        doNothing().when(userRepository).deleteById(userId);
+        userService.delete(userId);
+        verify(userRepository, times(1)).deleteById(userId);
+    }
+
+    @Test
+    void updateUserWithEmptyName() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenReturn(user);
+        UserDto userUpdateDto = UserDto.builder().name("").email("update@yandex.ru").build();
+        UserDto updatedUserDto = userService.update(1L, userUpdateDto);
+
+        assertEquals("", updatedUserDto.getName());
+        assertEquals("update@yandex.ru", updatedUserDto.getEmail());
+        verify(userRepository, times(1)).save(any(User.class));
+    }
+
+    @Test
+    void updateUserWithEmptyEmail() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenReturn(user);
+
+        UserDto userUpdateDto = UserDto.builder().name("Update").email("").build();
+        UserDto updatedUserDto = userService.update(1L, userUpdateDto);
+
+        assertEquals("Update", updatedUserDto.getName());
+        assertEquals("", updatedUserDto.getEmail());
+        verify(userRepository, times(1)).save(any(User.class));
     }
 }

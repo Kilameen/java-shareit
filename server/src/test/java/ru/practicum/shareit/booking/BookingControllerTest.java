@@ -27,7 +27,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @WebMvcTest(MockitoExtension.class)
-class BookingControllerTest  {
+class BookingControllerTest {
 
     @InjectMocks
     private BookingController bookingController;
@@ -59,27 +59,21 @@ class BookingControllerTest  {
     @Test
     void createBookingReturnCreatedBooking() {
         when(bookingService.create(anyLong(), any(BookingCreateDto.class))).thenReturn(bookingDto);
-
         BookingDto result = bookingController.create(1L, bookingCreateDto);
-
         assertEquals(bookingDto, result);
     }
 
     @Test
     void updateBookingReturnUpdatedBooking() {
         when(bookingService.update(anyLong(), anyLong(), any(Boolean.class))).thenReturn(bookingDto);
-
         BookingDto result = bookingController.update(1L, 1L, true);
-
         assertEquals(bookingDto, result);
     }
 
     @Test
     void findBookingByIdReturnBookingDto() {
         when(bookingService.getBookingById(anyLong(), anyLong())).thenReturn(bookingDto);
-
         BookingDto result = bookingController.findBookingById(1L, 1L);
-
         assertEquals(bookingDto, result);
     }
 
@@ -87,7 +81,6 @@ class BookingControllerTest  {
     void findAllReturnListOfBookings() {
         when(bookingService.findAll(anyLong(), any(String.class), any(Integer.class), any(Integer.class)))
                 .thenReturn(Collections.singletonList(bookingDto));
-
         List<BookingDto> result = bookingController.findAll(1L, "ALL", 0, 10);
 
         assertEquals(1, result.size());
@@ -98,7 +91,6 @@ class BookingControllerTest  {
     void getAllOwnerReturnListOfBookings() {
         when(bookingService.getOwnerBookings(anyLong(), any(String.class), any(Integer.class), any(Integer.class)))
                 .thenReturn(Collections.singletonList(bookingDto));
-
         List<BookingDto> result = bookingController.getAllOwner(1L, "ALL", 0, 10);
 
         assertEquals(1, result.size());
@@ -111,5 +103,21 @@ class BookingControllerTest  {
                 .thenThrow(new NotFoundException("Item not found"));
 
         assertThrows(NotFoundException.class, () -> bookingController.create(1L, bookingCreateDto));
+    }
+
+    @Test
+    void updateBookingWhenServiceThrowsNotFoundException() {
+        when(bookingService.update(anyLong(), anyLong(), any(Boolean.class)))
+                .thenThrow(new NotFoundException("Booking not found"));
+
+        assertThrows(NotFoundException.class, () -> bookingController.update(1L, 1L, true));
+    }
+
+    @Test
+    void findBookingByIdWhenServiceThrowsNotFoundException() {
+        when(bookingService.getBookingById(anyLong(), anyLong()))
+                .thenThrow(new NotFoundException("Booking not found"));
+
+        assertThrows(NotFoundException.class, () -> bookingController.findBookingById(1L, 1L));
     }
 }

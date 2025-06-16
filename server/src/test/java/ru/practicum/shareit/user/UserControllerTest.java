@@ -99,4 +99,15 @@ class UserControllerTest {
 
         verify(userService, times(1)).findAll();
     }
+
+    @Test
+    void getAllUsers_emptyList() throws Exception {
+        when(userService.findAll()).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/users"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+
+        verify(userService, times(1)).findAll();
+    }
 }

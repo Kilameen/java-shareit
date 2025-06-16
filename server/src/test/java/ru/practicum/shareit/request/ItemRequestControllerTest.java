@@ -15,13 +15,14 @@ import ru.practicum.shareit.utils.Constants;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ItemRequestController.class)
 public class ItemRequestControllerTest {
@@ -91,5 +92,52 @@ public class ItemRequestControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void getUserRequestsEmptyList() throws Exception {
+        when(itemRequestService.getUserRequests(anyLong())).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/requests")
+                        .header(Constants.USER_ID_HEADER, 1L)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void getAllRequestsWithPagination() throws Exception {
+        when(itemRequestService.getAllRequests(anyLong(), any(), any())).thenReturn(List.of(itemRequestDto));
+
+        mockMvc.perform(get("/requests/all?from=0&size=10")
+                        .header(Constants.USER_ID_HEADER, 1L)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void getAllRequestsEmptyList() throws Exception {
+        when(itemRequestService.getAllRequests(anyLong(), any(), any())).thenReturn(List.of());
+
+        mockMvc.perform(get("/requests/all")
+                        .header(Constants.USER_ID_HEADER, 1L)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string("[]"));
+    }
+
+    @Test
+    void getAllRequestsWithInvalidPaginationParams() throws Exception {
+        mockMvc.perform(get("/requests/all")
+                        .header(Constants.USER_ID_HEADER, 1L)
+                        .param("from", "-1")
+                        .param("size", "0")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 }
