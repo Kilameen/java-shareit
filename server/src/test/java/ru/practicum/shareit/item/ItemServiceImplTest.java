@@ -17,6 +17,7 @@ import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -205,5 +206,47 @@ class ItemServiceImplTest {
         assertEquals(item.getName(), itemDto.getName());
         assertEquals(item.getDescription(), itemDto.getDescription());
         assertEquals(item.getAvailable(), itemDto.getAvailable());
+    }
+
+    @Test
+    void getAllItemDtoByUserId_UserNotFound() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
+            itemService.getAllItemDtoByUserId(1L);
+        });
+
+        assertEquals("Пользователь с ID 1 не найден.", exception.getMessage());
+    }
+
+    @Test
+    void searchItems_EmptyText() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        List<ItemDto> result = itemService.searchItems(1L, "");
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void searchItems_BlankText() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        List<ItemDto> result = itemService.searchItems(1L, "   ");
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void searchItems_NullText() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        List<ItemDto> result = itemService.searchItems(1L, null);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void updateItemNotOwner() {
+        User anotherUser = User.builder().id(2L).build();
+        item.setOwner(anotherUser);
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
+
+        assertThrows(NotFoundException.class, () -> itemService.update(1L, 1L, itemUpdateDto));
     }
 }
