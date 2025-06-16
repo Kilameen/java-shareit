@@ -100,7 +100,7 @@ class BookingControllerTest {
     @Test
     void createBookingWhenServiceThrowsNotFoundException() {
         when(bookingService.create(anyLong(), any(BookingCreateDto.class)))
-                .thenThrow(new NotFoundException("Item not found"));
+                .thenThrow(new NotFoundException("Вещь не найдена"));
 
         assertThrows(NotFoundException.class, () -> bookingController.create(1L, bookingCreateDto));
     }
@@ -108,7 +108,7 @@ class BookingControllerTest {
     @Test
     void updateBookingWhenServiceThrowsNotFoundException() {
         when(bookingService.update(anyLong(), anyLong(), any(Boolean.class)))
-                .thenThrow(new NotFoundException("Booking not found"));
+                .thenThrow(new NotFoundException("Бронирование не найдено"));
 
         assertThrows(NotFoundException.class, () -> bookingController.update(1L, 1L, true));
     }
@@ -116,7 +116,7 @@ class BookingControllerTest {
     @Test
     void findBookingByIdWhenServiceThrowsNotFoundException() {
         when(bookingService.getBookingById(anyLong(), anyLong()))
-                .thenThrow(new NotFoundException("Booking not found"));
+                .thenThrow(new NotFoundException("Бронирование не найдено"));
 
         assertThrows(NotFoundException.class, () -> bookingController.findBookingById(1L, 1L));
     }

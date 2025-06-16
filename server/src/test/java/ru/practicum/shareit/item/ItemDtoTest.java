@@ -22,7 +22,7 @@ class ItemDtoTest {
                 .name("Test Item")
                 .description("Test Description")
                 .available(true)
-                .owner(new UserDto(1L, "Test User", "test@example.com"))
+                .owner(new UserDto(1L, "Test User", "test@yandex.ru"))
                 .lastBooking(new BookingDto())
                 .comments(Collections.emptyList())
                 .nextBooking(new BookingDto())
@@ -37,7 +37,7 @@ class ItemDtoTest {
 
     @Test
     void testItemDtoDeserialization() throws IOException {
-        String json = "{\"id\":1,\"name\":\"Test Item\",\"description\":\"Test Description\",\"available\":true,\"owner\":{\"id\":1,\"name\":\"Test User\",\"email\":\"test@example.com\"},\"lastBooking\":null,\"comments\":[],\"nextBooking\":null,\"requestId\":1}";
+        String json = "{\"id\":1,\"name\":\"Test Item\",\"description\":\"Test Description\",\"available\":true,\"owner\":{\"id\":1,\"name\":\"Test User\",\"email\":\"test@yandex.ru\"},\"lastBooking\":null,\"comments\":[],\"nextBooking\":null,\"requestId\":1}";
         ItemDto itemDto = objectMapper.readValue(json, ItemDto.class);
 
         assertNotNull(itemDto);

@@ -25,7 +25,7 @@ public class ItemRequestServiceImplIntegrationTest {
     private final UserRepository userRepository;
 
     @Test
-    void createItemRequest_shouldReturnSavedItemRequest() {
+    void createItemRequestReturnSavedItemRequest() {
         User user = new User();
         user.setName("Test User");
         user.setEmail("test@yandex.ru");
@@ -41,7 +41,7 @@ public class ItemRequestServiceImplIntegrationTest {
     }
 
     @Test
-    void getUserRequests_shouldReturnListOfUserRequests() {
+    void getUserRequestsReturnListOfUserRequests() {
         User user = new User();
         user.setName("Test User");
         user.setEmail("test@yandex.ru");

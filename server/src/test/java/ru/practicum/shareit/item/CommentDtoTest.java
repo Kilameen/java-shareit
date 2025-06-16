@@ -140,7 +140,7 @@ public class CommentDtoTest {
     }
 
     @Test
-    void testCommentDtoDeserialization_invalidDate() throws IOException {
+    void testCommentDtoDeserializationInvalidDate() throws IOException {
         String jsonString = "{\"id\":1,\"itemId\":10,\"text\":\"Test comment\",\"authorName\":\"Test\",\"created\":\"invalid-date\"}";
         try {
             CommentDto commentDto = json.parse(jsonString).getObject();
@@ -150,21 +150,23 @@ public class CommentDtoTest {
     }
 
     @Test
-    void testCommentDtoSerialization_specialCharacters() throws IOException {
+    void testCommentDtoSerializationSpecialCharacters() throws IOException {
         CommentDto commentDto = CommentDto.builder()
                 .id(1L)
                 .itemId(10L)
-                .text("Comment with special characters: !@#$%^&*()")
-                .authorName("Author with special characters: ~`")
+                .text("\n" +
+                        "Комментарий со специальными символами: !@#$%^&*()")
+                .authorName("Автор со специальными символами: ~`")
                 .created(LocalDateTime.now())
                 .build();
 
         JsonContent<CommentDto> result = json.write(commentDto);
 
         assertThat(result).extractingJsonPathStringValue("$.text")
-                .isEqualTo("Comment with special characters: !@#$%^&*()");
+                .isEqualTo("\n" +
+                        "Комментарий со специальными символами: !@#$%^&*()");
         assertThat(result).extractingJsonPathStringValue("$.authorName")
-                .isEqualTo("Author with special characters: ~`");
+                .isEqualTo("Автор со специальными символами: ~`");
     }
 
     @Test

@@ -49,12 +49,12 @@ class BookingServiceImplTest {
         booker = new User();
         booker.setId(1L);
         booker.setName("Booker");
-        booker.setEmail("booker@example.com");
+        booker.setEmail("booker@yandex.ru");
 
         owner = new User();
         owner.setId(2L);
         owner.setName("Owner");
-        owner.setEmail("owner@example.com");
+        owner.setEmail("owner@yandex.ru");
 
         item = new Item();
         item.setId(3L);
