@@ -144,7 +144,7 @@ class ItemRequestServiceImplTest {
     }
 
     @Test
-    void getAllRequests_whenFromIsNegative_thenThrowsIllegalArgumentException() {
+    void getAllRequestsWhenFromIsNegativeThenThrowsIllegalArgumentException() {
         Long userId = 1L;
         Integer from = -1;
         Integer size = 10;
@@ -156,7 +156,7 @@ class ItemRequestServiceImplTest {
     }
 
     @Test
-    void getAllRequests_whenSizeIsZero_thenThrowsIllegalArgumentException() {
+    void getAllRequestsWhenSizeIsZeroThenThrowsIllegalArgumentException() {
         Long userId = 1L;
         Integer from = 0;
         Integer size = 0;
@@ -168,7 +168,7 @@ class ItemRequestServiceImplTest {
     }
 
     @Test
-    void getAllRequests_whenSizeIsNegative_thenThrowsIllegalArgumentException() {
+    void getAllRequestsWhenSizeIsNegativeThenThrowsIllegalArgumentException() {
         Long userId = 1L;
         Integer from = 0;
         Integer size = -1;
@@ -177,5 +177,33 @@ class ItemRequestServiceImplTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         assertThrows(IllegalArgumentException.class, () -> itemRequestService.getAllRequests(userId, from, size));
+    }
+
+    @Test
+    void getAllRequestsWhenFromAndSizeAreValidThenReturnsRequests() {
+        Long userId = 1L;
+        int from = 0;
+        int size = 10;
+
+        User user = new User();
+        user.setId(userId);
+
+        ItemRequest request1 = new ItemRequest();
+        request1.setId(1L);
+        request1.setRequester(new User());
+        request1.getRequester().setId(2L);
+
+        List<ItemRequest> allItemRequests = List.of(request1);
+
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by("created").descending());
+        Page<ItemRequest> pageResult = new PageImpl<>(allItemRequests, pageable, allItemRequests.size());
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(itemRequestRepository.findAll(pageable)).thenReturn(pageResult);
+
+        List<ItemRequestDto> result = itemRequestService.getAllRequests(userId, from, size);
+
+        assertEquals(1, result.size());
+        assertEquals(1L, result.get(0).getId());
     }
 }
