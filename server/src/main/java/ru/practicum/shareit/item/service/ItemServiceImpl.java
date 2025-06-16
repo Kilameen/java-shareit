@@ -168,6 +168,7 @@ public class ItemServiceImpl implements ItemService {
         List<Comment> comments = commentRepository.findAllByItemId(itemId);
         log.info("Найдено {} комментариев для item ID: {}", comments.size(), itemId);
         return comments.stream()
+                .filter(Objects::nonNull)
                 .map(CommentMapper::toCommentDto)
                 .collect(toList());
     }
