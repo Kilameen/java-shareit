@@ -45,9 +45,6 @@ public class BookingController {
                                     @RequestParam(value = "state", defaultValue = "ALL") String bookingState,
                                     @RequestParam(defaultValue = "0") Integer from,
                                     @RequestParam(defaultValue = "10") Integer size) {
-        if (from < 0 || size <= 0) {
-            throw new IllegalArgumentException("Параметры 'from' и 'size' должны быть положительными числами, 'size' > 0.");
-        }
         log.info("GET запрос на получение списка всех бронирований текущего пользователя с id: {} и статусом {}", userId, bookingState);
         return bookingService.findAll(userId, bookingState, from, size);
     }
@@ -57,9 +54,6 @@ public class BookingController {
                                         @RequestParam(value = "state", defaultValue = "ALL") String bookingState,
                                         @RequestParam(defaultValue = "0") Integer from,
                                         @RequestParam(defaultValue = "10") Integer size) {
-        if (from < 0 || size <= 0) {
-            throw new IllegalArgumentException("Параметры 'from' и 'size' должны быть положительными числами, 'size' > 0.");
-        }
         log.info("GET запрос на получение списка всех бронирований текущего владельца с id: {} и статусом {}", ownerId, bookingState);
         return bookingService.getOwnerBookings(ownerId, bookingState, from, size);
     }

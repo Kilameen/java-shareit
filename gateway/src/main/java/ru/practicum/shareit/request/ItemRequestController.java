@@ -1,7 +1,8 @@
 package ru.practicum.shareit.request;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +33,8 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public ResponseEntity<Object> getAllRequests(@RequestHeader(Constants.USER_ID_HEADER) Long userId,
-                                                 @RequestParam(name = "from", defaultValue = "0") @Min(0) Integer from,
-                                                 @RequestParam(value = "size", defaultValue = "10") @Min(1) Integer size) {
+                                                 @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                                 @Positive @RequestParam(value = "size", defaultValue = "10") Integer size) {
         log.info("GET запрос на получение списка запросов, созданных другими пользователями.");
         return requestClient.findAllRequests(userId, from, size);
     }

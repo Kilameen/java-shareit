@@ -63,11 +63,11 @@ public class BookingServiceImplIntegrationTest {
         bookingCreateDto.setStart(LocalDateTime.now().plusDays(1));
         bookingCreateDto.setEnd(LocalDateTime.now().plusDays(2));
 
-        BookingDto createdBooking = bookingService.create(booker.getId(), bookingCreateDto);
+        bookingService.create(booker.getId(), bookingCreateDto);
+        Optional<Booking> retrievedBooking = bookingRepository.findById(item.getId());
 
-        Optional<Booking> retrievedBooking = bookingRepository.findById(createdBooking.getId());
-        assertTrue(retrievedBooking.isPresent());
-        assertEquals(Status.WAITING, retrievedBooking.get().getStatus());
+        assertTrue(retrievedBooking.isPresent(), "Бронирование должно быть сохранено в базе данных");
+        assertEquals(Status.WAITING, retrievedBooking.get().getStatus(), "Статус бронирования должен быть WAITING");
     }
 
     @Test

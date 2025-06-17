@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.utils.Constants;
 
 import java.util.Collections;
 
@@ -22,6 +24,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 
+@AutoConfigureMockMvc
 @WebMvcTest(ItemController.class)
 public class ItemControllerTest {
 
@@ -71,11 +74,13 @@ public class ItemControllerTest {
         when(itemService.create(anyLong(), any(ItemCreateDto.class))).thenReturn(itemDto);
 
         mockMvc.perform(post("/items")
-                        .header("X-Sharer-User-Id", 1L)
+                        .header(Constants.USER_ID_HEADER, 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(itemCreateDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)));
+
+        verify(itemService, times(1)).create(anyLong(), any(ItemCreateDto.class));
     }
 
     @Test
@@ -83,21 +88,24 @@ public class ItemControllerTest {
         when(itemService.update(anyLong(), anyLong(), any(ItemUpdateDto.class))).thenReturn(itemDto);
 
         mockMvc.perform(patch("/items/{itemId}", 1L)
-                        .header("X-Sharer-User-Id", 1L)
+                        .header(Constants.USER_ID_HEADER, 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(itemUpdateDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)));
+
+        verify(itemService, times(1)).update(anyLong(), anyLong(), any(ItemUpdateDto.class));
     }
 
     @Test
     void updateItemTest_InvalidInput_ReturnsBadRequest() throws Exception {
         ItemUpdateDto invalidItemUpdateDto = new ItemUpdateDto();
         mockMvc.perform(patch("/items/{itemId}", 1L)
-                        .header("X-Sharer-User-Id", 1L)
+                        .header(Constants.USER_ID_HEADER, 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidItemUpdateDto)))
                 .andExpect(status().isOk());
+        verify(itemService, times(1)).update(anyLong(), anyLong(), any(ItemUpdateDto.class));
     }
 
     @Test
@@ -113,9 +121,11 @@ public class ItemControllerTest {
         when(itemService.getItemDtoById(anyLong(), anyLong())).thenReturn(itemDto);
 
         mockMvc.perform(get("/items/{itemId}", 1L)
-                        .header("X-Sharer-User-Id", 1L))
+                        .header(Constants.USER_ID_HEADER, 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)));
+
+        verify(itemService, times(1)).getItemDtoById(anyLong(), anyLong());
     }
 
     @Test
@@ -129,9 +139,11 @@ public class ItemControllerTest {
         when(itemService.getAllItemDtoByUserId(anyLong())).thenReturn(Collections.singletonList(itemDto));
 
         mockMvc.perform(get("/items")
-                        .header("X-Sharer-User-Id", 1L))
+                        .header(Constants.USER_ID_HEADER, 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id", is(1)));
+
+        verify(itemService, times(1)).getAllItemDtoByUserId(anyLong());
     }
 
     @Test
@@ -145,10 +157,12 @@ public class ItemControllerTest {
         when(itemService.searchItems(anyLong(), any(String.class))).thenReturn(Collections.singletonList(itemDto));
 
         mockMvc.perform(get("/items/search")
-                        .header("X-Sharer-User-Id", 1L)
+                        .header(Constants.USER_ID_HEADER, 1L)
                         .param("text", "text"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id", is(1)));
+
+        verify(itemService, times(1)).searchItems(anyLong(), any(String.class));
     }
 
     @Test
@@ -163,7 +177,7 @@ public class ItemControllerTest {
         when(itemService.searchItems(anyLong(), any(String.class))).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/items/search")
-                        .header("X-Sharer-User-Id", 1L)
+                        .header(Constants.USER_ID_HEADER, 1L)
                         .param("text", ""))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
@@ -176,7 +190,7 @@ public class ItemControllerTest {
         when(itemService.searchItems(anyLong(), any(String.class))).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/items/search")
-                        .header("X-Sharer-User-Id", 1L)
+                        .header(Constants.USER_ID_HEADER, 1L)
                         .param("text", "   "))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
@@ -198,11 +212,12 @@ public class ItemControllerTest {
         when(itemService.createComment(anyLong(), any(CommentCreateDto.class), anyLong())).thenReturn(commentDto);
 
         mockMvc.perform(post("/items/{itemId}/comment", 1L)
-                        .header("X-Sharer-User-Id", 1L)
+                        .header(Constants.USER_ID_HEADER, 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(commentCreateDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)));
+        verify(itemService, times(1)).createComment(anyLong(), any(CommentCreateDto.class), anyLong());
     }
 
     @Test

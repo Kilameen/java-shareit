@@ -3,39 +3,36 @@ package ru.practicum.shareit.booking;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.utils.Constants;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(MockitoExtension.class)
+@AutoConfigureMockMvc
+@WebMvcTest(BookingController.class)
 class BookingControllerTest {
-
-    @InjectMocks
-    private BookingController bookingController;
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockBean
     private BookingService bookingService;
 
     @Autowired
@@ -49,75 +46,138 @@ class BookingControllerTest {
         bookingDto = new BookingDto();
         bookingDto.setId(1L);
 
+
         bookingCreateDto = new BookingCreateDto();
         bookingCreateDto.setItemId(1L);
-
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
     }
 
     @Test
-    void createBookingReturnCreatedBooking() {
+    void createBookingReturnCreatedBooking() throws Exception {
         when(bookingService.create(anyLong(), any(BookingCreateDto.class))).thenReturn(bookingDto);
-        BookingDto result = bookingController.create(1L, bookingCreateDto);
-        assertEquals(bookingDto, result);
+
+        mockMvc.perform(post("/bookings")
+                        .header(Constants.USER_ID_HEADER, 1L)
+                        .content(objectMapper.writeValueAsString(bookingCreateDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(bookingDto.getId()), Long.class));
+
+        verify(bookingService, times(1)).create(anyLong(), any(BookingCreateDto.class));
     }
 
     @Test
-    void updateBookingReturnUpdatedBooking() {
+    void updateBookingReturnUpdatedBooking() throws Exception {
         when(bookingService.update(anyLong(), anyLong(), any(Boolean.class))).thenReturn(bookingDto);
-        BookingDto result = bookingController.update(1L, 1L, true);
-        assertEquals(bookingDto, result);
+
+        mockMvc.perform(patch("/bookings/{bookingId}", 1L)
+                        .header(Constants.USER_ID_HEADER, 1L)
+                        .param("approved", "true")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(bookingDto.getId()), Long.class));
+
+        verify(bookingService, times(1)).update(anyLong(), anyLong(), any(Boolean.class));
     }
 
     @Test
-    void findBookingByIdReturnBookingDto() {
+    void findBookingByIdReturnBookingDto() throws Exception {
         when(bookingService.getBookingById(anyLong(), anyLong())).thenReturn(bookingDto);
-        BookingDto result = bookingController.findBookingById(1L, 1L);
-        assertEquals(bookingDto, result);
+
+        mockMvc.perform(get("/bookings/{bookingId}", 1L)
+                        .header(Constants.USER_ID_HEADER, 1L)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(bookingDto.getId()), Long.class));
+
+        verify(bookingService, times(1)).getBookingById(anyLong(), anyLong());
     }
 
     @Test
-    void findAllReturnListOfBookings() {
+    void findAllReturnListOfBookings() throws Exception {
         when(bookingService.findAll(anyLong(), any(String.class), any(Integer.class), any(Integer.class)))
                 .thenReturn(Collections.singletonList(bookingDto));
-        List<BookingDto> result = bookingController.findAll(1L, "ALL", 0, 10);
 
-        assertEquals(1, result.size());
-        assertEquals(bookingDto, result.get(0));
+        mockMvc.perform(get("/bookings")
+                        .header(Constants.USER_ID_HEADER, 1L)
+                        .param("state", "ALL")
+                        .param("from", "0")
+                        .param("size", "10")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id", is(bookingDto.getId()), Long.class));
+
+        verify(bookingService, times(1)).findAll(anyLong(), any(String.class), any(Integer.class), any(Integer.class));
     }
 
     @Test
-    void getAllOwnerReturnListOfBookings() {
+    void getAllOwnerReturnListOfBookings() throws Exception {
         when(bookingService.getOwnerBookings(anyLong(), any(String.class), any(Integer.class), any(Integer.class)))
                 .thenReturn(Collections.singletonList(bookingDto));
-        List<BookingDto> result = bookingController.getAllOwner(1L, "ALL", 0, 10);
 
-        assertEquals(1, result.size());
-        assertEquals(bookingDto, result.get(0));
+        mockMvc.perform(get("/bookings/owner")
+                        .header(Constants.USER_ID_HEADER, 1L)
+                        .param("state", "ALL")
+                        .param("from", "0")
+                        .param("size", "10")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id", is(bookingDto.getId()), Long.class));
+
+        verify(bookingService, times(1)).getOwnerBookings(anyLong(), any(String.class), any(Integer.class), any(Integer.class));
     }
 
     @Test
-    void createBookingWhenServiceThrowsNotFoundException() {
+    void createBookingWhenServiceThrowsNotFoundException() throws Exception {
         when(bookingService.create(anyLong(), any(BookingCreateDto.class)))
                 .thenThrow(new NotFoundException("Вещь не найдена"));
 
-        assertThrows(NotFoundException.class, () -> bookingController.create(1L, bookingCreateDto));
+        mockMvc.perform(post("/bookings")
+                        .header(Constants.USER_ID_HEADER, 1L)
+                        .content(objectMapper.writeValueAsString(bookingCreateDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound()); // Ожидаем код 404
+        verify(bookingService, times(1)).create(anyLong(), any(BookingCreateDto.class));
     }
 
     @Test
-    void updateBookingWhenServiceThrowsNotFoundException() {
+    void updateBookingWhenServiceThrowsNotFoundException() throws Exception {
         when(bookingService.update(anyLong(), anyLong(), any(Boolean.class)))
                 .thenThrow(new NotFoundException("Бронирование не найдено"));
 
-        assertThrows(NotFoundException.class, () -> bookingController.update(1L, 1L, true));
+        mockMvc.perform(patch("/bookings/{bookingId}", 1L)
+                        .header(Constants.USER_ID_HEADER, 1L)
+                        .param("approved", "true")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound()); // Ожидаем код 404
+
+        verify(bookingService, times(1)).update(anyLong(), anyLong(), any(Boolean.class));
     }
 
     @Test
-    void findBookingByIdWhenServiceThrowsNotFoundException() {
+    void findBookingByIdWhenServiceThrowsNotFoundException() throws Exception {
         when(bookingService.getBookingById(anyLong(), anyLong()))
                 .thenThrow(new NotFoundException("Бронирование не найдено"));
 
-        assertThrows(NotFoundException.class, () -> bookingController.findBookingById(1L, 1L));
+        mockMvc.perform(get("/bookings/{bookingId}", 1L)
+                        .header(Constants.USER_ID_HEADER, 1L)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound()); // Ожидаем код 404
+        verify(bookingService, times(1)).getBookingById(anyLong(), anyLong());
     }
 }

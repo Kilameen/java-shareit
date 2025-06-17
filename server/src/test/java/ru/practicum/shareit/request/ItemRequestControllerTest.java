@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -20,10 +21,11 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@AutoConfigureMockMvc
 @WebMvcTest(ItemRequestController.class)
 public class ItemRequestControllerTest {
 
@@ -53,13 +55,14 @@ public class ItemRequestControllerTest {
     void create() throws Exception {
         when(itemRequestService.create(anyLong(), any())).thenReturn(itemRequestDto);
 
-
         mockMvc.perform(post("/requests")
                         .header(Constants.USER_ID_HEADER, 1L)
                         .content(mapper.writeValueAsString(itemRequestCreateDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+
+        verify(itemRequestService, times(1)).create(anyLong(), any());
     }
 
     @Test
@@ -70,6 +73,8 @@ public class ItemRequestControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+
+        verify(itemRequestService, times(1)).getAllRequestById(anyLong());
     }
 
     @Test
@@ -81,6 +86,8 @@ public class ItemRequestControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+
+        verify(itemRequestService, times(1)).getAllRequests(anyLong(), any(), any());
     }
 
     @Test
@@ -92,6 +99,8 @@ public class ItemRequestControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+
+        verify(itemRequestService, times(1)).getUserRequests(anyLong());
     }
 
     @Test
@@ -105,6 +114,8 @@ public class ItemRequestControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
+
+        verify(itemRequestService, times(1)).getUserRequests(anyLong());
     }
 
     @Test
@@ -116,6 +127,8 @@ public class ItemRequestControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+
+        verify(itemRequestService, times(1)).getAllRequests(anyLong(), any(), any());
     }
 
     @Test
@@ -128,16 +141,7 @@ public class ItemRequestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string("[]"));
-    }
 
-    @Test
-    void getAllRequestsWithInvalidPaginationParams() throws Exception {
-        mockMvc.perform(get("/requests/all")
-                        .header(Constants.USER_ID_HEADER, 1L)
-                        .param("from", "-1")
-                        .param("size", "0")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+        verify(itemRequestService, times(1)).getAllRequests(anyLong(), any(), any());
     }
 }

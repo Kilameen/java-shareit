@@ -34,9 +34,6 @@ public class ItemRequestController {
     public List<ItemRequestDto> getAllRequests(@RequestHeader(Constants.USER_ID_HEADER) Long userId,
                                                @RequestParam(defaultValue = "0") Integer from,
                                                @RequestParam(defaultValue = "10") Integer size) {
-        if (from < 0 || size <= 0) {
-            throw new IllegalArgumentException("Параметры 'from' и 'size' должны быть положительными числами, 'size' > 0.");
-        }
         log.info("GET запрос на получение списка запросов, созданных другими пользователями.");
         return itemRequestService.getAllRequests(userId, from, size);
     }

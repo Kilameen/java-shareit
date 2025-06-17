@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking;
 
-import jakarta.validation.constraints.Min;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
@@ -48,8 +47,8 @@ public class BookingController {
     @GetMapping("/owner")
     public ResponseEntity<Object> getAllOwner(@RequestHeader(Constants.USER_ID_HEADER) Long ownerId,
                                               @RequestParam(value = "state", defaultValue = "ALL") String bookingState,
-                                              @RequestParam(value = "from", defaultValue = "0") @Min(0) Integer from,
-                                              @RequestParam(value = "size", defaultValue = "10") @Min(1) Integer size) {
+                                              @PositiveOrZero @RequestParam(value = "from", defaultValue = "0") Integer from,
+                                              @Positive @RequestParam(value = "size", defaultValue = "10") Integer size) {
         BookingState state = BookingState.from(bookingState)
                 .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + bookingState));
         log.info("GET запрос на получение списка всех бронирований текущего владельца с id: {} и статусом {}, от={}, до={}", ownerId, bookingState, from, size);
