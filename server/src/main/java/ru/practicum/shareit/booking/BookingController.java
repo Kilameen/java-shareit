@@ -9,7 +9,9 @@ import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.utils.Constants;
 
 import java.util.List;
-
+/**
+ * Контроллер для обработки запросов, связанных с бронированием (Booking).
+ */
 @RestController
 @RequestMapping("/bookings")
 @RequiredArgsConstructor
@@ -18,6 +20,12 @@ public class BookingController {
 
     private final BookingService bookingService;
 
+    /**
+     * Обрабатывает POST-запрос на создание нового бронирования.
+     * @param userId ID пользователя, выполняющего запрос, берется из заголовка.
+     * @param bookingCreateDto DTO с данными для создания бронирования.
+     * @return DTO созданного бронирования.
+     */
     @PostMapping
     public BookingDto create(@RequestHeader(Constants.USER_ID_HEADER) Long userId,
                              @RequestBody BookingCreateDto bookingCreateDto) {
@@ -25,6 +33,13 @@ public class BookingController {
         return bookingService.create(userId, bookingCreateDto);
     }
 
+    /**
+     * Обрабатывает PATCH-запрос на обновление статуса бронирования (подтверждение/отклонение).
+     * @param userId ID пользователя, выполняющего запрос (владельца вещи), берется из заголовка.
+     * @param bookingId ID бронирования, которое нужно обновить, берется из пути.
+     * @param approved Параметр, указывающий, подтверждено ли бронирование (true) или отклонено (false).
+     * @return DTO обновленного бронирования.
+     */
     @PatchMapping("/{bookingId}")
     public BookingDto update(@RequestHeader(Constants.USER_ID_HEADER) Long userId,
                              @PathVariable Long bookingId,
@@ -33,6 +48,12 @@ public class BookingController {
         return bookingService.update(userId, bookingId, approved);
     }
 
+    /**
+     * Обрабатывает GET-запрос на получение информации о бронировании по ID.
+     * @param userId ID пользователя, выполняющего запрос, берется из заголовка.
+     * @param bookingId ID бронирования, которое нужно получить, берется из пути.
+     * @return DTO бронирования.
+     */
     @GetMapping("/{bookingId}")
     public BookingDto findBookingById(@RequestHeader(Constants.USER_ID_HEADER) Long userId,
                                       @PathVariable("bookingId") Long bookingId) {
@@ -40,6 +61,14 @@ public class BookingController {
         return bookingService.getBookingById(userId, bookingId);
     }
 
+    /**
+     * Обрабатывает GET-запрос на получение списка бронирований пользователя.
+     * @param userId ID пользователя, выполняющего запрос, берется из заголовка.
+     * @param bookingState Фильтр по состоянию бронирования (ALL, CURRENT, PAST, FUTURE, WAITING, REJECTED).
+     * @param from Начальная позиция для постраничного вывода.
+     * @param size Количество бронирований на странице.
+     * @return Список DTO бронирований.
+     */
     @GetMapping
     public List<BookingDto> findAll(@RequestHeader(Constants.USER_ID_HEADER) Long userId,
                                     @RequestParam(value = "state", defaultValue = "ALL") String bookingState,
@@ -49,6 +78,14 @@ public class BookingController {
         return bookingService.findAll(userId, bookingState, from, size);
     }
 
+    /**
+     * Обрабатывает GET-запрос на получение списка бронирований вещей, принадлежащих пользователю (владельцу).
+     * @param ownerId ID владельца вещей, берется из заголовка.
+     * @param bookingState Фильтр по состоянию бронирования.
+     * @param from Начальная позиция для постраничного вывода.
+     * @param size Количество бронирований на странице.
+     * @return Список DTO бронирований.
+     */
     @GetMapping("/owner")
     public List<BookingDto> getAllOwner(@RequestHeader(Constants.USER_ID_HEADER) Long ownerId,
                                         @RequestParam(value = "state", defaultValue = "ALL") String bookingState,

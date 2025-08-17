@@ -12,6 +12,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * Базовый класс для клиентов, взаимодействующих с другими сервисами по HTTP.
+ */
 public class BaseClient {
     protected final RestTemplate rest;
 

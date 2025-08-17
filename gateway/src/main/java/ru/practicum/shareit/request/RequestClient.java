@@ -12,6 +12,9 @@ import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
 
 import java.util.Map;
 
+/**
+ *  Клиент для взаимодействия с сервисом запросов вещей.
+ */
 @Service
 public class RequestClient extends BaseClient {
 
@@ -27,14 +30,32 @@ public class RequestClient extends BaseClient {
         );
     }
 
+    /**
+     *  Создает запрос вещи.
+     * @param userId Идентификатор пользователя, создающего запрос.
+     * @param requestDto DTO с данными запроса.
+     * @return ResponseEntity с результатом запроса.
+     */
     public ResponseEntity<Object> create(Long userId, ItemRequestCreateDto requestDto) {
         return post("", userId, requestDto);
     }
 
+    /**
+     *  Получает запросы пользователя.
+     * @param userId Идентификатор пользователя.
+     * @return ResponseEntity с результатом запроса.
+     */
     public ResponseEntity<Object> findUserRequests(Long userId) {
         return get("", userId);
     }
 
+    /**
+     * Получает все запросы с пагинацией.
+     * @param userId Идентификатор пользователя, выполняющего запрос.
+     * @param from Начальная позиция для пагинации.
+     * @param size Количество элементов на странице.
+     * @return ResponseEntity с результатом запроса.
+     */
     public ResponseEntity<Object> findAllRequests(Long userId, Integer from, Integer size) {
         Map<String, Object> parameters = Map.of(
                 "from", from,
@@ -44,6 +65,11 @@ public class RequestClient extends BaseClient {
         return get("/all?from={from}&size={size}", userId, parameters);
     }
 
+    /**
+     * Получает запрос по ID.
+     * @param requestId Идентификатор запроса.
+     * @return ResponseEntity с результатом запроса.
+     */
     public ResponseEntity<Object> findRequestById(Long requestId) {
         return get("/" + requestId);
     }

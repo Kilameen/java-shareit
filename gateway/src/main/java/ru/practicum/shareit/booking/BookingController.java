@@ -11,6 +11,9 @@ import ru.practicum.shareit.booking.dto.BookItemRequestDto;
 import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.utils.Constants;
 
+/**
+ * Контроллер для обработки запросов, связанных с бронированием вещей.
+ */
 @RestController
 @RequestMapping(path = "/bookings")
 @RequiredArgsConstructor
@@ -18,6 +21,12 @@ import ru.practicum.shareit.utils.Constants;
 public class BookingController {
     private final BookingClient bookingClient;
 
+    /**
+     * Обрабатывает POST-запрос на создание нового бронирования вещи.
+     * @param userId ID пользователя, выполняющего запрос. Берется из заголовка запроса.
+     * @param requestDto DTO с информацией о бронировании.
+     * @return ResponseEntity с информацией о созданном бронировании.
+     */
     @PostMapping
     public ResponseEntity<Object> create(@RequestHeader(Constants.USER_ID_HEADER) Long userId,
                                          @Valid @RequestBody BookItemRequestDto requestDto) {
@@ -25,6 +34,13 @@ public class BookingController {
         return bookingClient.create(userId, requestDto);
     }
 
+    /**
+     * Обрабатывает PATCH-запрос на обновление статуса бронирования (подтверждение или отклонение).
+     * @param userId ID пользователя, выполняющего запрос. Берется из заголовка запроса.
+     * @param bookingId ID бронирования, которое нужно обновить.
+     * @param approved Статус бронирования (true - подтверждено, false - отклонено).
+     * @return ResponseEntity с информацией об обновленном бронировании.
+     */
     @PatchMapping("/{bookingId}")
     public ResponseEntity<Object> update(@RequestHeader(Constants.USER_ID_HEADER) Long userId,
                                          @PathVariable Long bookingId,
@@ -33,6 +49,14 @@ public class BookingController {
         return bookingClient.update(userId, bookingId, approved);
     }
 
+    /**
+     * Обрабатывает GET-запрос на получение списка всех бронирований текущего пользователя.
+     * @param userId ID пользователя, выполняющего запрос. Берется из заголовка запроса.
+     * @param stateParam Строковый параметр, определяющий состояние бронирований (ALL, CURRENT, PAST, FUTURE, WAITING, REJECTED).
+     * @param from Индекс первого элемента в списке бронирований (для пагинации).
+     * @param size Количество элементов на странице (для пагинации).
+     * @return ResponseEntity со списком бронирований.
+     */
     @GetMapping
     public ResponseEntity<Object> getBookings(@RequestHeader(Constants.USER_ID_HEADER) Long userId,
                                               @RequestParam(name = "state", defaultValue = "ALL") String stateParam,
@@ -44,6 +68,14 @@ public class BookingController {
         return bookingClient.getBookings(userId, state, from, size);
     }
 
+    /**
+     * Обрабатывает GET-запрос на получение списка всех бронирований вещей, принадлежащих текущему владельцу.
+     * @param ownerId ID владельца вещей, выполняющего запрос. Берется из заголовка запроса.
+     * @param bookingState Строковый параметр, определяющий состояние бронирований (ALL, CURRENT, PAST, FUTURE, WAITING, REJECTED).
+     * @param from Индекс первого элемента в списке бронирований (для пагинации).
+     * @param size Количество элементов на странице (для пагинации).
+     * @return ResponseEntity со списком бронирований.
+     */
     @GetMapping("/owner")
     public ResponseEntity<Object> getAllOwner(@RequestHeader(Constants.USER_ID_HEADER) Long ownerId,
                                               @RequestParam(value = "state", defaultValue = "ALL") String bookingState,
@@ -55,6 +87,12 @@ public class BookingController {
         return bookingClient.getAllOwner(ownerId, state, from, size);
     }
 
+    /**
+     * Обрабатывает GET-запрос на получение данных о конкретном бронировании.
+     * @param userId ID пользователя, выполняющего запрос. Берется из заголовка запроса.
+     * @param bookingId ID бронирования, информацию о котором нужно получить.
+     * @return ResponseEntity с информацией о бронировании.
+     */
     @GetMapping("/{bookingId}")
     public ResponseEntity<Object> getBooking(@RequestHeader(Constants.USER_ID_HEADER) Long userId,
                                              @PathVariable Long bookingId) {
